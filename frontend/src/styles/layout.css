@@ -1,0 +1,8 @@
+.nav-button:hover {
+  background-color: #00acc1;
+  color: white !important;
+}
+
+.nav-button {
+  transition: all 0.2s ease;
+}
