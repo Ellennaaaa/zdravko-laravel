@@ -38,4 +38,9 @@ class Patient extends Model
     {
         return $this->hasMany(Measurement::class);
     }
+
+    public function smartGlucometers()
+    {
+        return $this->hasMany(SmartGlucometer::class);
+    }
 }

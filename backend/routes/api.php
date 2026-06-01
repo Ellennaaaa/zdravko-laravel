@@ -10,6 +10,9 @@ use App\Http\Controllers\Api\EmergencyContactController;
 use App\Http\Controllers\Api\EmergencyContactInvitationController;
 use App\Http\Controllers\Api\ContactDashboardController;
 use App\Http\Controllers\Api\NotificationController;
+use App\Http\Controllers\Api\SmartGlucometerController;
+use App\Http\Controllers\Api\SosController;
+use App\Http\Controllers\Api\AdminController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -52,7 +55,18 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/notifications/unread', [NotificationController::class, 'unread']);
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead']);
 
+    Route::get('/smart-glucometers', [SmartGlucometerController::class, 'index']);
+    Route::post('/smart-glucometers', [SmartGlucometerController::class, 'store']);
+    Route::delete('/smart-glucometers/{id}', [SmartGlucometerController::class, 'destroy']);
+
+    Route::post('/sos', [SosController::class, 'send']);
 });
 
 Route::post('/contact-invitations/accept', [EmergencyContactInvitationController::class, 'accept']);
 
+Route::middleware(['auth:sanctum', 'admin'])->group(function () {
+    Route::get('/admin/stats', [AdminController::class, 'stats']);
+    Route::get('/admin/users', [AdminController::class, 'users']);
+    Route::get('/admin/measurements', [AdminController::class, 'measurements']);
+    Route::get('/admin/smart-glucometers', [AdminController::class, 'smartGlucometers']);
+});

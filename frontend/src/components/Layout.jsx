@@ -1,6 +1,8 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import '../styles/layout.css'
 import NotificationBell from './NotificationBell'
+import { sendSos } from '../api/sos'
+
 
 function Layout({ children, user }) {
   const location = useLocation()
@@ -9,19 +11,46 @@ function Layout({ children, user }) {
   const isPatient = roleNames.includes('patient')
   const isContact = roleNames.includes('contact')
 
+  const navigate = useNavigate()
+
   const patientLinks = [
     { path: '/dashboard', label: 'Dijagram' },
     { path: '/measurements', label: 'Mjerenja' },
     { path: '/therapies', label: 'Terapija' },
     { path: '/emergency-contacts', label: 'Hitni kontakti' },
+    { path: '/smart-glucometers', label: 'Smart Glucometers' }
   ]
 
   const contactLinks = [
     { path: '/dashboard', label: 'Dijagram' },
-    { path: '/reminders', label: 'Podsjetnici' },
   ]
 
-  const links = isPatient ? patientLinks : contactLinks
+  const isAdmin = roleNames.includes('admin')
+
+  const adminLinks = [
+    { path: '/admin', label: 'Admin Panel' },
+  ]
+
+  const handleSos = async () => {
+  const confirmed = window.confirm(
+    'Are you sure you want to send an SOS alert to all emergency contacts?'
+  )
+
+  if (!confirmed) return
+
+  try {
+    const response = await sendSos()
+
+    alert(response.data.message)
+  } catch (err) {
+    alert(
+      err.response?.data?.message ||
+      'Failed to send SOS alert.'
+    )
+  }
+}
+
+ const links = isAdmin ? adminLinks : isPatient ? patientLinks : contactLinks
   return (
     <div style={styles.page}>
       <main style={styles.content}>
@@ -30,7 +59,7 @@ function Layout({ children, user }) {
 
       <nav style={styles.navbar}>
         <h2 style={styles.logo}>Zdravko</h2>
-
+        <button onClick={() => navigate('/profile')}style={styles.profileCircle}>{user?.username?.charAt(0)?.toUpperCase() || '?'}</button>
         <NotificationBell/>
 
         {links.map((link) => (
@@ -46,6 +75,15 @@ function Layout({ children, user }) {
             {link.label}
           </Link>
         ))}
+
+        {isPatient && (
+          <button
+            onClick={handleSos}
+            style={styles.sosButton}
+          >
+            🚨 SOS
+          </button>
+        )}
       </nav>
     </div>
   )
@@ -92,6 +130,32 @@ const styles = {
     backgroundColor: '#3f51b5',
     color: 'white',
   },
+
+  sosButton: {
+    marginTop: 'auto',
+    padding: '16px',
+    border: 'none',
+    borderRadius: '10px',
+    backgroundColor: '#d32f2f',
+    color: 'white',
+    fontSize: '20px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    boxShadow: '0 4px 15px rgba(211,47,47,0.35)',
+},
+profileCircle: {
+  width: '48px',
+  height: '48px',
+  borderRadius: '50%',
+  border: 'none',
+  backgroundColor: '#3f51b5',
+  color: 'white',
+  fontSize: '20px',
+  fontWeight: 'bold',
+  cursor: 'pointer',
+  alignSelf: 'center',
+  marginBottom: '15px',
+},
 }
 
 export default Layout

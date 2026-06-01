@@ -9,3 +9,5 @@ Artisan::command('inspire', function () {
 })->purpose('Display an inspiring quote');
 
 Schedule::command('zdravko:send-health-reminders')->everyMinute();
+Schedule::command('zdravko:simulate-smart-glucometer-readings')
+    ->everyMinute();

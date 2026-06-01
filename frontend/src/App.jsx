@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, Navigate } from 'react-router-dom'
 import { getUser } from './api/auth'
 import Layout from './components/Layout'
+import AdminPanel from './pages/AdminPanel'
 
 import Register from './pages/Register'
 import Login from './pages/Login'
@@ -10,6 +11,8 @@ import Measurements from './pages/Measurements'
 import Therapies from './pages/Therapies'
 import EmergencyContacts from './pages/EmergencyContacts'
 import AcceptContactInvitation from './pages/AcceptContactInvitation'
+import SmartGlucometers from './pages/SmartGlucometers'
+import Profile from './pages/Profile'
 
 function App() {
   const [user, setUser] = useState(null)
@@ -32,6 +35,9 @@ function App() {
       <Route path="/measurements" element={<Layout user={user}><Measurements /></Layout>} />
       <Route path="/therapies" element={<Layout user={user}><Therapies /></Layout>} />
       <Route path="/emergency-contacts" element={<Layout user={user}><EmergencyContacts /></Layout>} />
+      <Route path="/smart-glucometers" element={<Layout user={user}><SmartGlucometers /></Layout>}/>
+      <Route path="/profile" element={<Layout user={user}><Profile user={user} setUser={setUser} /></Layout>}/>
+      <Route path="/admin" element={user?.roles?.some(role => role.name === 'admin') ? (<Layout user={user}><AdminPanel /></Layout>): <Navigate to="/dashboard" />}/>
     </Routes>
   )
 }
