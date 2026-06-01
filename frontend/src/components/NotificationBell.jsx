@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   getUnreadNotifications,
   markNotificationAsRead,
@@ -7,7 +7,7 @@ import {
 function NotificationBell() {
   const [notifications, setNotifications] = useState([])
   const [open, setOpen] = useState(false)
-  const previousCount = useRef(0)
+  
 
   useEffect(() => {
     fetchNotifications()
@@ -20,28 +20,27 @@ function NotificationBell() {
   }, [])
 
   const playAlarm = () => {
-    const audio = new Audio('/alarm.mp3')
+    const audio = new Audio('/Alarm-Clock-Short-chosic.com_.mp3')
     audio.play().catch(() => {
       console.log('Sound blocked until user interacts with page.')
     })
   }
 
-  const fetchNotifications = async () => {
-    try {
-      const response = await getUnreadNotifications()
-      const unread = response.data.notifications || []
+ const fetchNotifications = async () => {
+  try {
+    const response = await getUnreadNotifications()
+    const unread = response.data.notifications || []
 
-      if (unread.length > previousCount.current) {
-        playAlarm()
-        setOpen(true)
-      }
-
-      previousCount.current = unread.length
-      setNotifications(unread)
-    } catch (err) {
-      console.error('Failed to fetch notifications', err)
+    if (unread.length > 0) {
+      playAlarm()
+      setOpen(true)
     }
+
+    setNotifications(unread)
+  } catch (err) {
+    console.error('Failed to fetch notifications', err)
   }
+}
 
   const markAsRead = async (id) => {
     try {
@@ -54,7 +53,7 @@ function NotificationBell() {
 
   return (
     <div style={styles.wrapper}>
-      <button onClick={() => setOpen(!open)} style={styles.bellButton}>
+      <button onClick={() => {setOpen(!open)}} style={styles.bellButton}>
         🔔 {notifications.length > 0 && <span>({notifications.length})</span>}
       </button>
 
