@@ -8,4 +8,4 @@ Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-Schedule::command('zdravko:send-health-reminders')->everyTenMinutes();
+Schedule::command('zdravko:send-health-reminders')->everyMinute();

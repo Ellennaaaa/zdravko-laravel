@@ -54,6 +54,13 @@ class SendHealthReminders extends Command
                  if (! $this->hasUnreadMeasurementReminder($patient->user)) {
                     $patient->user->notify(new MeasurementReminderNotification());
             }
+
+            $this->info(
+                'Patient ' . $patient->id .
+                ' user ' . $patient->user->id .
+                ' last measurement created at ' . $lastMeasurement->created_at .
+                ' hours passed: ' . $hoursPassed
+            );
         }
     }
     }
