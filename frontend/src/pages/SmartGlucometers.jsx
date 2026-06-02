@@ -81,13 +81,13 @@ function SmartGlucometers() {
 
   return (
     <div style={styles.container}>
-      <h1 style={styles.title}>Smart Glucometers</h1>
+      <h1 style={styles.title}>Pametni glukometri</h1>
 
       {success && <p style={styles.success}>{success}</p>}
       {error && <p style={styles.error}>{error}</p>}
 
       <section style={styles.card}>
-        <h2>Add Smart Glucometer</h2>
+        <h2>Dodaj pametni glukometar</h2>
         <p style={styles.text}>
           Add a simulated Bluetooth glucometer. Active devices will automatically
           generate glucose readings through the scheduler.
@@ -117,20 +117,20 @@ function SmartGlucometers() {
               checked={formData.is_active}
               onChange={handleChange}
             />
-            Active device
+            Aktivni uredjaj
           </label>
 
           <button type="submit" style={styles.button}>
-            Add Glucometer
+            Dodaj glukometar
           </button>
         </form>
       </section>
 
       <section style={styles.card}>
-        <h2>My Devices</h2>
+        <h2>Moji uredjaji</h2>
 
         {glucometers.length === 0 ? (
-          <p>No smart glucometers added yet.</p>
+          <p>Jos uvijek nema dodatih glukometara.</p>
         ) : (
           glucometers.map((device) => (
             <div key={device.id} style={styles.item}>
@@ -148,7 +148,7 @@ function SmartGlucometers() {
                 onClick={() => handleDelete(device.id)}
                 style={styles.deleteButton}
               >
-                Delete
+                Obrisi
               </button>
             </div>
           ))

@@ -25,13 +25,13 @@ function Profile({ user, setUser }) {
 
         <h1 style={styles.title}>My Profile</h1>
 
-        <p><strong>Username:</strong> {user?.username}</p>
+        <p><strong>Korisnicko ime:</strong> {user?.username}</p>
         <p><strong>Email:</strong> {user?.email}</p>
-        <p><strong>Phone:</strong> {user?.phone_number}</p>
-        <p><strong>Role:</strong> {roles}</p>
+        <p><strong>Broj telefona:</strong> {user?.phone_number}</p>
+        <p><strong>Uloga:</strong> {roles}</p>
 
         <button onClick={handleLogout} style={styles.logoutButton}>
-          Logout
+          Odjaviti se
         </button>
       </div>
     </div>

@@ -129,7 +129,7 @@ function EmergencyContacts() {
           />
 
           <button type="submit" style={styles.button}>
-            Send Invitation
+            Posalji poziv
           </button>
         </form>
       </section>
@@ -172,8 +172,8 @@ function EmergencyContacts() {
                 <strong>{invitation.name}</strong>
               </p>
               <p>Email: {invitation.email}</p>
-              <p>Phone: {invitation.phone_number}</p>
-              <p>Relationship: {invitation.relationship}</p>
+              <p>Broj telefona: {invitation.phone_number}</p>
+              <p>Veza: {invitation.relationship}</p>
               <p>
                 Status:{' '}
                 {invitation.accepted_at ? 'Accepted' : 'Pending'}

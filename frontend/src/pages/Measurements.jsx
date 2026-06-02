@@ -169,7 +169,7 @@ function Measurements() {
                     onClick={() => handleEdit(measurement)}
                     style={styles.smallButton}
                   >
-                    Edit
+                    Izmijeni
                   </button>
 
                   <button

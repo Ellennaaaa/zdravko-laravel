@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { login } from '../api/auth'
+import { login, getUser } from '../api/auth'
 import { useNavigate } from 'react-router-dom'
 
-function Login() {
+function Login({setUser}) {
   const navigate = useNavigate()
 
   const [formData, setFormData] = useState({
@@ -26,9 +26,12 @@ function Login() {
       const response = await login(formData)
 
       localStorage.setItem('token', response.data.token)
-
+      
+      const userResponse = await getUser()
+      setUser(userResponse.data.user)
+      
       setSuccess(response.data.message)
-      navigate('/')
+      navigate('/dashboard')
     } catch (err) {
       if (err.response?.status === 422) {
         const errors = err.response.data.errors
@@ -66,7 +69,7 @@ function Login() {
           />
 
           <button type="submit" style={styles.button}>
-            Uloguj se
+            Prijavite se
           </button>
         </form>
 

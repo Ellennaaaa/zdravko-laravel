@@ -10,4 +10,4 @@ Artisan::command('inspire', function () {
 
 Schedule::command('zdravko:send-health-reminders')->everyMinute();
 Schedule::command('zdravko:simulate-smart-glucometer-readings')
-    ->everyMinute();
+    ->everyTenMinutes();
