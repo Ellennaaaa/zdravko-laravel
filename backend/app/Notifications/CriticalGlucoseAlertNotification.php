@@ -24,7 +24,7 @@ class CriticalGlucoseAlertNotification extends Notification
         return [
             'kind' => 'critical_glucose_alert',
             'title' => 'Critical blood glucose alert',
-            'message' => 'A critical blood glucose value was recorded.',
+            'message' => 'Primijecena kriticna vrijednost secera u krvi',
             'measurement_id' => $this->measurement->id,
             'value' => $this->measurement->value,
             'unit' => $this->measurement->bloodGlucoseUnit?->symbol,

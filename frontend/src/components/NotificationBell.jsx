@@ -59,10 +59,10 @@ function NotificationBell() {
 
       {open && (
         <div style={styles.dropdown}>
-          <h3>Notifications</h3>
+          <h3>Obavjestenja</h3>
 
           {notifications.length === 0 ? (
-            <p>No unread notifications.</p>
+            <p>Nema neprocitanih obavjestenja.</p>
           ) : (
             notifications.map((notification) => (
               <div key={notification.id} style={styles.notification}>
@@ -73,7 +73,7 @@ function NotificationBell() {
                   onClick={() => markAsRead(notification.id)}
                   style={styles.readButton}
                 >
-                  Mark as read
+                  Oznaci kao procitano.
                 </button>
               </div>
             ))

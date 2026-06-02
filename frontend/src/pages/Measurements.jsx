@@ -163,7 +163,7 @@ function Measurements() {
               <tr key={measurement.id}>
                 <td>{measurement.value}</td>
                 <td>{measurement.blood_glucose_unit?.symbol}</td>
-                <td>{measurement.measured_on || '—'}</td>
+                <td>{new Date(measurement.measured_on).toLocaleDateString() || '—'}</td>
                 <td>
                   <button
                     onClick={() => handleEdit(measurement)}
