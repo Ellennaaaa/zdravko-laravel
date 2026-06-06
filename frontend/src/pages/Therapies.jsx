@@ -11,7 +11,7 @@ import {
 function Therapies() {
   const [therapies, setTherapies] = useState([])
   const [therapyLogs, setTherapyLogs] = useState([])
-
+  const [loading, setLoading] = useState(true)
   const [therapyData, setTherapyData] = useState({
     medicine_id: 1,
     dosage: '',
@@ -40,16 +40,20 @@ function Therapies() {
   }, [])
 
   const loadData = async () => {
+  setLoading(true)
+
     try {
       const therapiesResponse = await getTherapies()
       const logsResponse = await getTherapyLogs()
 
-      setTherapies(therapiesResponse.data.therapies)
-      setTherapyLogs(logsResponse.data.therapy_logs)
+      setTherapies(therapiesResponse.data.therapies || [])
+      setTherapyLogs(logsResponse.data.therapy_logs || [])
     } catch (err) {
-      setError('Failed to load therapy data.')
+      setError('Greška')
+    } finally {
+      setLoading(false)
     }
-  }
+}
 
   const handleTherapyChange = (e) => {
     setTherapyData({
@@ -73,7 +77,7 @@ function Therapies() {
     try {
       await storeTherapy(therapyData)
 
-      setSuccess('Therapy plan added successfully.')
+      setSuccess('Plan terapije uspješno dodat.')
 
       setTherapyData({
         medicine_id: 1,
@@ -100,7 +104,7 @@ function Therapies() {
     try {
       await storeTherapyLog(logData)
 
-      setSuccess('Therapy log added successfully.')
+      setSuccess('Zapis o terapiji uspješno unesen.')
 
       setLogData({
         therapy_id: '',
@@ -120,20 +124,20 @@ function Therapies() {
   const handleDeleteTherapy = async (id) => {
     try {
       await deleteTherapy(id)
-      setSuccess('Therapy deleted.')
+      setSuccess('Terapija izbrisana.')
       loadData()
     } catch {
-      setError('Failed to delete therapy.')
+      setError('Greška')
     }
   }
 
   const handleDeleteLog = async (id) => {
     try {
       await deleteTherapyLog(id)
-      setSuccess('Therapy log deleted.')
+      setSuccess('Izbrisan zapis terapije.')
       loadData()
     } catch {
-      setError('Failed to delete therapy log.')
+      setError('Greška')
     }
   }
 
@@ -142,10 +146,21 @@ function Therapies() {
       const errors = err.response.data.errors
       setError(Object.values(errors).flat().join(', '))
     } else {
-      setError(err.response?.data?.error || 'Something went wrong.')
+      setError(err.response?.data?.error || 'Greška.')
     }
   }
 
+  const today = new Date()
+
+  const activeTherapies = therapies.filter((therapy) => {
+    const startDate = therapy.start_date ? new Date(therapy.start_date) : null
+    const endDate = therapy.end_date ? new Date(therapy.end_date) : null
+
+    const started = !startDate || startDate <= today
+    const notEnded = !endDate || endDate >= today
+
+    return started && notEnded
+})
   return (
     <div style={styles.container}>
       <h1 style={styles.title}>Terapije</h1>
@@ -224,14 +239,14 @@ function Therapies() {
 
           <textarea
             name="note"
-            placeholder="Note"
+            placeholder="Bilješka"
             value={therapyData.note}
             onChange={handleTherapyChange}
             style={styles.textarea}
           />
 
           <button type="submit" style={styles.button}>
-            Dodaj terapiju
+            Dodajte terapiju
           </button>
         </form>
       </section>
@@ -239,17 +254,26 @@ function Therapies() {
       <section style={styles.card}>
         <h2>Moji planovi terapije</h2>
 
-        {therapies.length === 0 ? (
-          <p>No therapy plans yet.</p>
+        {loading ? (
+          <p>Učitavanje planova terapije...</p>
+        ) : therapies.length === 0 ? (
+          <p>Još uvijek nema planova terapije</p>
         ) : (
           therapies.map((therapy) => (
             <div key={therapy.id} style={styles.item}>
               <p>
                 <strong>{therapy.medicine?.name}</strong> — {therapy.dosage}{' '}
-                {therapy.unit?.symbol}, {therapy.times_per_day}x/day
+                {therapy.unit?.symbol}, {therapy.times_per_day}x dnevno
               </p>
               <p>
-                From {therapy.start_date || '—'} to {therapy.end_date || 'ongoing'}
+                Od{' '}
+                {therapy.start_date
+                  ? new Date(therapy.start_date).toLocaleDateString('sr-RS')
+                  : '-'}
+                {' '}do{' '}
+                {therapy.end_date
+                  ? new Date(therapy.end_date).toLocaleDateString('sr-RS')
+                  : 'ongoing'}
               </p>
               <p>{therapy.note}</p>
 
@@ -257,7 +281,7 @@ function Therapies() {
                 onClick={() => handleDeleteTherapy(therapy.id)}
                 style={styles.deleteButton}
               >
-                Delete
+                Obriši
               </button>
             </div>
           ))
@@ -265,7 +289,7 @@ function Therapies() {
       </section>
 
       <section style={styles.card}>
-        <h2>Dodaj uzetu terapiju</h2>
+        <h2>Dodajte uzetu terapiju</h2>
 
         <form onSubmit={handleLogSubmit} style={styles.form}>
           <select
@@ -274,8 +298,8 @@ function Therapies() {
             onChange={handleLogChange}
             style={styles.input}
           >
-            <option value="">No linked therapy plan</option>
-            {therapies.map((therapy) => (
+            <option value="">Plan terapije</option>
+            {activeTherapies.map((therapy) => (
               <option key={therapy.id} value={therapy.id}>
                 {therapy.medicine?.name} — {therapy.dosage} {therapy.unit?.symbol}
               </option>
@@ -331,7 +355,7 @@ function Therapies() {
           />
 
           <button type="submit" style={styles.button}>
-            Sacuvaj zapis o terapiji.
+            Sacuvajte zapis o terapiji.
           </button>
         </form>
       </section>
@@ -339,8 +363,10 @@ function Therapies() {
       <section style={styles.card}>
         <h2>Zapisi o terapiji.</h2>
 
-        {therapyLogs.length === 0 ? (
-          <p>No therapy logs yet.</p>
+        {loading ? (
+          <p>Učitavanje zapisa o terapiji...</p>
+        ) : therapyLogs.length === 0 ? (
+          <p>Još uvijek nema zapisa o terapiji.</p>
         ) : (
           therapyLogs.map((log) => (
             <div key={log.id} style={styles.item}>
@@ -348,14 +374,21 @@ function Therapies() {
                 <strong>{log.medicine?.name}</strong> — {log.dosage}{' '}
                 {log.unit?.symbol}
               </p>
-              <p>Taken at: {log.taken_at}</p>
+              <p>
+                Uzeto:{' '}
+                {new Date(log.taken_at).toLocaleDateString('sr-RS')} {' '}
+                {new Date(log.taken_at).toLocaleTimeString('sr-RS', {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                })}
+              </p>
               <p>{log.note}</p>
 
               <button
                 onClick={() => handleDeleteLog(log.id)}
                 style={styles.deleteButton}
               >
-                Delete
+                Obriši
               </button>
             </div>
           ))

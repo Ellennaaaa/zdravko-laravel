@@ -31,7 +31,7 @@ function Profile({ user, setUser }) {
         <p><strong>Uloga:</strong> {roles}</p>
 
         <button onClick={handleLogout} style={styles.logoutButton}>
-          Odjaviti se
+          Odjavite se
         </button>
       </div>
     </div>

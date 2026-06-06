@@ -6,6 +6,7 @@ use App\Http\Requests\TherapyLogRequest;
 use App\Models\Therapy;
 use App\Models\TherapyLog;
 use Illuminate\Http\Request;
+use App\Services\EducationalAdviceService;
 
 class TherapyLogController extends ApiController
 {
@@ -51,10 +52,14 @@ class TherapyLogController extends ApiController
             ...$validated,
             'patient_id' => $user->patient->id,
         ])->load(['therapy', 'medicine', 'unit']);
+        
+        $advice = app(EducationalAdviceService::class)
+             ->getAdviceForPatient($user->patient);
 
         return $this->respond([
             'message' => 'Therapy log created successfully.',
-            'therapy_log' => $log,
+            'therapy_log' => $therapyLog,
+            'advice' => $advice,
         ], 201);
     }
 

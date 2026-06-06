@@ -34,6 +34,8 @@ function Dashboard({ user }) {
   const [contactPatients, setContactPatients] = useState([])
   const [selectedPatientId, setSelectedPatientId] = useState('')
   const [error, setError] = useState(null)
+  const [loadingDashboard, setLoadingDashboard] = useState(false)
+  const [loadingPatients, setLoadingPatients] = useState(false)
 
   useEffect(() => {
     if (!user) return
@@ -51,51 +53,81 @@ function Dashboard({ user }) {
     }
   }, [selectedPatientId, isContact, isPatient])
 
-  const formatDate = (dateString) => {
+  const formatDateTime = (dateString) => {
     if (!dateString) return 'No date'
-    return dateString.slice(0, 10)
+
+    return new Date(dateString).toLocaleString('sr-RS', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
   }
 
-  const prepareGlucoseData = (items = []) =>
-    items.map((item) => ({
-      date: formatDate(item.measured_on),
-      value: Number(item.value),
-      unit: item.blood_glucose_unit?.symbol,
-    }))
+  const formatDateOnly = (dateString) => {
+    if (!dateString) return 'No date'
+
+    return new Date(dateString).toLocaleDateString('sr-RS', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+    })
+  }
+
+  const prepareGlucoseData = (items = []) => {
+    return items.map((item) => {
+      const dateSource = item.created_at || item.measured_on
+
+      return {
+        date: formatDateOnly(dateSource),
+        dateTime: formatDateTime(dateSource),
+        value: Number(item.value),
+        unit: item.blood_glucose_unit?.symbol,
+      }
+    })
+  }
 
   const prepareTherapyData = (items = []) => {
-    const grouped = {}
+    return items.map((item) => {
+      const dateSource = item.created_at || item.taken_at
 
-    items.forEach((item) => {
-      const date = formatDate(item.taken_at)
-      grouped[date] = (grouped[date] || 0) + 1
+      return {
+        date: formatDateOnly(dateSource),
+        dateTime: formatDateTime(dateSource),
+        count: 1,
+        medicine: item.medicine?.name,
+      }
     })
-
-    return Object.keys(grouped).map((date) => ({
-      date,
-      count: grouped[date],
-    }))
   }
 
   const loadPatientDashboard = async () => {
     setError(null)
+    setLoadingDashboard(true)
 
     try {
       const glucoseResponse =
-        period === 'weekly' ? await getWeeklyGlucose() : await getMonthlyGlucose()
+        period === 'weekly'
+          ? await getWeeklyGlucose()
+          : await getMonthlyGlucose()
 
       const therapyResponse =
-        period === 'weekly' ? await getWeeklyTherapy() : await getMonthlyTherapy()
+        period === 'weekly'
+          ? await getWeeklyTherapy()
+          : await getMonthlyTherapy()
 
-      setGlucoseData(prepareGlucoseData(glucoseResponse.data.data))
-      setTherapyData(prepareTherapyData(therapyResponse.data.data))
+      setGlucoseData(prepareGlucoseData(glucoseResponse.data.data || []))
+      setTherapyData(prepareTherapyData(therapyResponse.data.data || []))
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load dashboard.')
+    } finally {
+      setLoadingDashboard(false)
     }
   }
 
   const loadContactPatients = async () => {
     setError(null)
+    setLoadingPatients(true)
 
     try {
       const response = await getContactPatients()
@@ -108,27 +140,61 @@ function Dashboard({ user }) {
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load linked patients.')
+    } finally {
+      setLoadingPatients(false)
     }
   }
 
   const loadContactDashboard = async (patientId) => {
     setError(null)
+    setLoadingDashboard(true)
 
     try {
       const response = await getContactDashboard(patientId)
 
-      setGlucoseData(prepareGlucoseData(response.data.blood_glucose))
-      setTherapyData(prepareTherapyData(response.data.therapy_logs))
+      setGlucoseData(prepareGlucoseData(response.data.blood_glucose || []))
+      setTherapyData(prepareTherapyData(response.data.therapy_logs || []))
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to load contact dashboard.')
+    } finally {
+      setLoadingDashboard(false)
     }
+  }
+
+  const glucoseTooltip = ({ active, payload }) => {
+    if (!active || !payload || payload.length === 0) return null
+
+    const item = payload[0].payload
+
+    return (
+      <div style={styles.tooltip}>
+        <p><strong>{item.dateTime}</strong></p>
+        <p>
+          Vrijednost: {item.value} {item.unit || ''}
+        </p>
+      </div>
+    )
+  }
+
+  const therapyTooltip = ({ active, payload }) => {
+    if (!active || !payload || payload.length === 0) return null
+
+    const item = payload[0].payload
+
+    return (
+      <div style={styles.tooltip}>
+        <p><strong>{item.dateTime}</strong></p>
+        <p>Terapija: {item.medicine || '—'}</p>
+        <p>Broj zapisa: {item.count}</p>
+      </div>
+    )
   }
 
   if (!user) {
     return (
       <div style={styles.container}>
         <h1 style={styles.title}>Dijagrami</h1>
-        <p>Ucitavanje korisnika</p>
+        <p style={styles.loader}>Učitavanje korisnika...</p>
       </div>
     )
   }
@@ -143,24 +209,26 @@ function Dashboard({ user }) {
             onClick={() => setPeriod('weekly')}
             style={period === 'weekly' ? styles.activeButton : styles.button}
           >
-            Weekly
+            Sedmično
           </button>
 
           <button
             onClick={() => setPeriod('monthly')}
             style={period === 'monthly' ? styles.activeButton : styles.button}
           >
-            Monthly
+            Mjesečno
           </button>
         </div>
       )}
 
       {isContact && !isPatient && (
         <section style={styles.card}>
-          <h2>Izaberi pacijenta</h2>
+          <h2>Izaberite pacijenta</h2>
 
-          {contactPatients.length === 0 ? (
-            <p>Nijeste jos povezani ni sa jednim pacijentom</p>
+          {loadingPatients ? (
+            <p style={styles.loader}>Učitavanje pacijenata...</p>
+          ) : contactPatients.length === 0 ? (
+            <p>Nijeste još povezani ni sa jednim pacijentom.</p>
           ) : (
             <select
               value={selectedPatientId}
@@ -182,15 +250,17 @@ function Dashboard({ user }) {
       <section style={styles.card}>
         <h2>Nivo glukoze u krvi</h2>
 
-        {glucoseData.length === 0 ? (
-          <p>Nema mjerenja nivoa glukoze za ovaj period</p>
+        {loadingDashboard ? (
+          <p style={styles.loader}>Učitavanje dijagrama glukoze...</p>
+        ) : glucoseData.length === 0 ? (
+          <p>Nema mjerenja nivoa glukoze za ovaj period.</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={glucoseData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />
-              <Tooltip />
+              <Tooltip content={glucoseTooltip} />
               <Line type="monotone" dataKey="value" />
             </LineChart>
           </ResponsiveContainer>
@@ -200,15 +270,17 @@ function Dashboard({ user }) {
       <section style={styles.card}>
         <h2>Unesena terapija</h2>
 
-        {therapyData.length === 0 ? (
-          <p>Nema zapisa o uzimanju terapije za ovaj period</p>
+        {loadingDashboard ? (
+          <p style={styles.loader}>Učitavanje dijagrama terapije...</p>
+        ) : therapyData.length === 0 ? (
+          <p>Nema zapisa o uzimanju terapije za ovaj period.</p>
         ) : (
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={therapyData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis allowDecimals={false} />
-              <Tooltip />
+              <Tooltip content={therapyTooltip} />
               <Bar dataKey="count" />
             </BarChart>
           </ResponsiveContainer>
@@ -267,6 +339,18 @@ const styles = {
   error: {
     color: '#d32f2f',
     textAlign: 'center',
+  },
+  loader: {
+    color: '#3f51b5',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  tooltip: {
+    backgroundColor: 'white',
+    border: '1px solid #b2ebf2',
+    borderRadius: '8px',
+    padding: '10px',
+    boxShadow: '0 4px 10px rgba(0,0,0,0.12)',
   },
 }
 

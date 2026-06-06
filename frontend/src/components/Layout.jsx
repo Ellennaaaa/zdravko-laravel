@@ -14,15 +14,15 @@ function Layout({ children, user }) {
   const navigate = useNavigate()
 
   const patientLinks = [
-    { path: '/dashboard', label: 'Dijagram' },
+    { path: '/dashboard', label: 'Dijagrami' },
     { path: '/measurements', label: 'Mjerenja' },
     { path: '/therapies', label: 'Terapija' },
     { path: '/emergency-contacts', label: 'Hitni kontakti' },
-    { path: '/smart-glucometers', label: 'Smart Glucometers' }
+    { path: '/smart-glucometers', label: 'Pametni glukometri' }
   ]
 
   const contactLinks = [
-    { path: '/dashboard', label: 'Dijagram' },
+    { path: '/dashboard', label: 'Dijagrami' },
   ]
 
   const isAdmin = roleNames.includes('admin')
@@ -33,7 +33,7 @@ function Layout({ children, user }) {
 
   const handleSos = async () => {
   const confirmed = window.confirm(
-    'Are you sure you want to send an SOS alert to all emergency contacts?'
+    'Da li ste sigurni da želite da pošaljete SOS poruku svim hitnim kontaktima'
   )
 
   if (!confirmed) return
@@ -45,7 +45,7 @@ function Layout({ children, user }) {
   } catch (err) {
     alert(
       err.response?.data?.message ||
-      'Failed to send SOS alert.'
+      'Greška. Nije uspjelo slanje SOS poruke'
     )
   }
 }
@@ -98,16 +98,16 @@ const styles = {
   content: {
     flex: 1,
     padding: '30px',
-    marginRight: '240px',
+    marginLeft: '240px',
   },
   navbar: {
     position: 'fixed',
-    right: 0,
+    left: 0,
     top: 0,
     width: '220px',
     height: '100vh',
     backgroundColor: '#ffffff',
-    boxShadow: '-4px 0 15px rgba(0, 150, 150, 0.12)',
+    boxShadow: '4px 0 15px rgba(0, 150, 150, 0.12)',
     padding: '25px 15px',
     display: 'flex',
     flexDirection: 'column',

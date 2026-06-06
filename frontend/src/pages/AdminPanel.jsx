@@ -42,37 +42,37 @@ function AdminPanel() {
 
       {stats && (
         <div style={styles.statsGrid}>
-          <div style={styles.statCard}>Users: {stats.users_count}</div>
-          <div style={styles.statCard}>Measurements: {stats.measurements_count}</div>
-          <div style={styles.statCard}>Therapies: {stats.therapies_count}</div>
-          <div style={styles.statCard}>Smart Glucometers: {stats.smart_glucometers_count}</div>
-          <div style={styles.statCard}>Emergency Contacts: {stats.emergency_contacts_count}</div>
+          <div style={styles.statCard}>Korisnici: {stats.users_count}</div>
+          <div style={styles.statCard}>Mjerenja: {stats.measurements_count}</div>
+          <div style={styles.statCard}>Terapije: {stats.therapies_count}</div>
+          <div style={styles.statCard}>Pametni glukometri: {stats.smart_glucometers_count}</div>
+          <div style={styles.statCard}>Hitni kontakti: {stats.emergency_contacts_count}</div>
         </div>
       )}
 
       <div style={styles.tabs}>
         <button onClick={() => setActiveTab('users')} style={activeTab === 'users' ? styles.activeButton : styles.button}>
-          Users
+          Korisnici
         </button>
         <button onClick={() => setActiveTab('measurements')} style={activeTab === 'measurements' ? styles.activeButton : styles.button}>
-          Measurements
+          Mjerenja
         </button>
         <button onClick={() => setActiveTab('glucometers')} style={activeTab === 'glucometers' ? styles.activeButton : styles.button}>
-          Smart Glucometers
+          Pametni glukometri
         </button>
       </div>
 
       {activeTab === 'users' && (
         <section style={styles.card}>
-          <h2>Users</h2>
+          <h2>Korisnici</h2>
 
           <table style={styles.table}>
             <thead>
               <tr>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Phone</th>
-                <th>Roles</th>
+                <th>Korisničko ime</th>
+                <th>Mail</th>
+                <th>Broj telefona</th>
+                <th>Uloga</th>
               </tr>
             </thead>
             <tbody>
@@ -91,15 +91,15 @@ function AdminPanel() {
 
       {activeTab === 'measurements' && (
         <section style={styles.card}>
-          <h2>Measurements</h2>
+          <h2>Mjerenja</h2>
 
           <table style={styles.table}>
             <thead>
               <tr>
-                <th>Patient</th>
-                <th>Value</th>
-                <th>Unit</th>
-                <th>Date</th>
+                <th>Pacijent</th>
+                <th>Vrijednost</th>
+                <th>Jedinica</th>
+                <th>Datum</th>
               </tr>
             </thead>
             <tbody>
@@ -118,16 +118,16 @@ function AdminPanel() {
 
       {activeTab === 'glucometers' && (
         <section style={styles.card}>
-          <h2>Smart Glucometers</h2>
+          <h2>Pametni glukometar</h2>
 
           <table style={styles.table}>
             <thead>
               <tr>
-                <th>Patient</th>
-                <th>Device</th>
-                <th>Serial</th>
-                <th>Active</th>
-                <th>Last Simulated</th>
+                <th>Pacijent</th>
+                <th>Uredjaj</th>
+                <th>Serijski broj</th>
+                <th>Aktivan</th>
+                <th>Posljednja simulacija</th>
               </tr>
             </thead>
             <tbody>

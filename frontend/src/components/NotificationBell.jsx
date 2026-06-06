@@ -59,10 +59,10 @@ function NotificationBell() {
 
       {open && (
         <div style={styles.dropdown}>
-          <h3>Obavjestenja</h3>
+          <h3>Obavještenja</h3>
 
           {notifications.length === 0 ? (
-            <p>Nema neprocitanih obavjestenja.</p>
+            <p>Nema nepročitanih obavještenja.</p>
           ) : (
             notifications.map((notification) => (
               <div key={notification.id} style={styles.notification}>
@@ -73,7 +73,7 @@ function NotificationBell() {
                   onClick={() => markAsRead(notification.id)}
                   style={styles.readButton}
                 >
-                  Oznaci kao procitano.
+                  Označite kao pročitano.
                 </button>
               </div>
             ))
@@ -99,7 +99,7 @@ const styles = {
   },
   dropdown: {
     position: 'absolute',
-    right: '0',
+    left: '0',
     top: '45px',
     width: '280px',
     backgroundColor: 'white',

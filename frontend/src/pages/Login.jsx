@@ -76,7 +76,7 @@ function Login({setUser}) {
         <p style={styles.footerText}>
           Nemate nalog?{' '}
           <a href="/register" style={styles.link}>
-            Registruj se
+            Registrujte se
           </a>
         </p>
       </div>

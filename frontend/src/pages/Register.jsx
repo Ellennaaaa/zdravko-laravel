@@ -135,14 +135,14 @@ function Register() {
           )}
 
           <button type="submit" style={styles.button}>
-            Registruj se
+            Registrujte se
           </button>
         </form>
 
         <p style={styles.footerText}>
-          Already have an account?{' '}
+          Već imate nalog?{' '}
           <a href="/login" style={styles.link}>
-            Login
+            Prijavite se.
           </a>
         </p>
       </div>

@@ -23,8 +23,8 @@ class TherapyReminderNotification extends Notification
     {
         return [
             'kind' => 'therapy_reminder',
-            'title' => 'Therapy reminder',
-            'message' => 'Trebate upisati uzetu terapiju',
+            'title' => 'Podsjetnik za terapiju.',
+            'message' => 'Treba da upišete uzetu terapiju',
             'therapy_id' => $this->therapy->id,
             'medicine' => $this->therapy->medicine?->name,
             'sound' => true,

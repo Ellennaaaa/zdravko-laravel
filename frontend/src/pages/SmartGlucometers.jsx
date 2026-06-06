@@ -14,6 +14,8 @@ function SmartGlucometers() {
     is_active: true,
   })
 
+  const [loading, setLoading] = useState(true)
+
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
 
@@ -21,12 +23,29 @@ function SmartGlucometers() {
     loadGlucometers()
   }, [])
 
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'Not simulated yet'
+
+    return new Date(dateString).toLocaleString('sr-RS', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    })
+  }
+
   const loadGlucometers = async () => {
+    setLoading(true)
+    setError(null)
+
     try {
       const response = await getSmartGlucometers()
       setGlucometers(response.data.smart_glucometers || [])
     } catch {
       setError('Failed to load smart glucometers.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -89,14 +108,13 @@ function SmartGlucometers() {
       <section style={styles.card}>
         <h2>Dodaj pametni glukometar</h2>
         <p style={styles.text}>
-          Add a simulated Bluetooth glucometer. Active devices will automatically
-          generate glucose readings through the scheduler.
+          Poveži pametni glukometar
         </p>
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <input
             name="device_name"
-            placeholder="Device name, e.g. AccuCheck Smart"
+            placeholder="Ime uredjaja"
             value={formData.device_name}
             onChange={handleChange}
             style={styles.input}
@@ -104,7 +122,7 @@ function SmartGlucometers() {
 
           <input
             name="device_serial"
-            placeholder="Serial number optional"
+            placeholder="Serijski broj"
             value={formData.device_serial}
             onChange={handleChange}
             style={styles.input}
@@ -129,26 +147,28 @@ function SmartGlucometers() {
       <section style={styles.card}>
         <h2>Moji uredjaji</h2>
 
-        {glucometers.length === 0 ? (
-          <p>Jos uvijek nema dodatih glukometara.</p>
+        {loading ? (
+          <p>Učitavanje pametnih glukometara...</p>
+        ) : glucometers.length === 0 ? (
+          <p>Još uvijek nema dodatih glukometara.</p>
         ) : (
           glucometers.map((device) => (
             <div key={device.id} style={styles.item}>
               <p>
                 <strong>{device.device_name}</strong>
               </p>
-              <p>Serial: {device.device_serial || '—'}</p>
-              <p>Status: {device.is_active ? 'Active' : 'Inactive'}</p>
+              <p>Serijski broj: {device.device_serial || '—'}</p>
+              <p>Status: {device.is_active ? 'Aktivan' : 'Neaktivan'}</p>
               <p>
-                Last simulated reading:{' '}
-                {device.last_simulated_at || 'Not simulated yet'}
+                Posljednje očitavanje:{' '}
+                {device.last_simulated_at || 'Još uvijek nema očitavanja'}
               </p>
 
               <button
                 onClick={() => handleDelete(device.id)}
                 style={styles.deleteButton}
               >
-                Obrisi
+                Obriši
               </button>
             </div>
           ))

@@ -18,8 +18,8 @@ class MeasurementReminderNotification extends Notification
     {
         return [
             'kind' => 'measurement_reminder',
-            'title' => 'Blood glucose reminder',
-            'message' => 'Nijeste mjerili secer neko vrijeme',
+            'title' => 'Podsjetnik za mjerenje glukoze',
+            'message' => 'Nijeste mjerili nivo glukoze neko vrijeme',
             'sound' => true,
         ];
     }

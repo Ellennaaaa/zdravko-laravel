@@ -9,6 +9,7 @@ import {
 function EmergencyContacts() {
   const [contacts, setContacts] = useState([])
   const [invitations, setInvitations] = useState([])
+  const [loading, setLoading] = useState(true)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -25,14 +26,19 @@ function EmergencyContacts() {
   }, [])
 
   const loadData = async () => {
+    setLoading(true)
+    setError(null)
+
     try {
       const contactsResponse = await getEmergencyContacts()
       const invitationsResponse = await getEmergencyContactInvitations()
 
-      setContacts(contactsResponse.data.emergency_contacts)
-      setInvitations(invitationsResponse.data.invitations)
+      setContacts(contactsResponse.data.emergency_contacts || [])
+      setInvitations(invitationsResponse.data.invitations || [])
     } catch {
-      setError('Neuspjesno ucitavanje hitnih kontakata.')
+      setError('Neuspješno učitavanje hitnih kontakata.')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -51,7 +57,7 @@ function EmergencyContacts() {
     try {
       await sendEmergencyContactInvitation(formData)
 
-      setSuccess('Poziv za hitnog kontakta uspjesno poslat')
+      setSuccess('Poziv za hitnog kontakta uspješno poslat.')
 
       setFormData({
         name: '',
@@ -66,18 +72,21 @@ function EmergencyContacts() {
         const errors = err.response.data.errors
         setError(Object.values(errors).flat().join(', '))
       } else {
-        setError(err.response?.data?.error || 'Something went wrong.')
+        setError(err.response?.data?.error || 'Greška.')
       }
     }
   }
 
   const handleDelete = async (id) => {
+    setError(null)
+    setSuccess(null)
+
     try {
       await deleteEmergencyContact(id)
-      setSuccess('Emergency contact removed.')
+      setSuccess('Izbrisan hitni kontakt.')
       loadData()
     } catch {
-      setError('Failed to delete emergency contact.')
+      setError('Greška. Hitni kontakt nije izbrisan.')
     }
   }
 
@@ -91,13 +100,13 @@ function EmergencyContacts() {
       <section style={styles.card}>
         <h2>Dodaj hitni kontakt</h2>
         <p style={styles.text}>
-          Unesi informacije o kontaktu. Aplikacija ce im poslati mejl poziva.
+          Unesi informacije o kontaktu. Aplikacija će uputiti mejl poziva.
         </p>
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <input
             name="name"
-            placeholder="Full name"
+            placeholder="Ime i prezime"
             value={formData.name}
             onChange={handleChange}
             style={styles.input}
@@ -114,7 +123,7 @@ function EmergencyContacts() {
 
           <input
             name="phone_number"
-            placeholder="Phone number"
+            placeholder="Broj telefona"
             value={formData.phone_number}
             onChange={handleChange}
             style={styles.input}
@@ -122,38 +131,40 @@ function EmergencyContacts() {
 
           <input
             name="relationship"
-            placeholder="Relationship, e.g. mother"
+            placeholder="Veza, npr. majka"
             value={formData.relationship}
             onChange={handleChange}
             style={styles.input}
           />
 
           <button type="submit" style={styles.button}>
-            Posalji poziv
+            Pošalji poziv
           </button>
         </form>
       </section>
 
       <section style={styles.card}>
-        <h2>Prihvaceni kontakti</h2>
+        <h2>Prihvaćeni kontakti</h2>
 
-        {contacts.length === 0 ? (
-          <p>No accepted emergency contacts yet.</p>
+        {loading ? (
+          <p style={styles.loader}>Učitavanje prihvaćenih kontakata...</p>
+        ) : contacts.length === 0 ? (
+          <p>Još uvijek nema prihvaćenih kontakata.</p>
         ) : (
           contacts.map((contact) => (
             <div key={contact.id} style={styles.item}>
               <p>
                 <strong>{contact.contact_user?.username}</strong>
               </p>
-              <p>Email: {contact.contact_user?.email}</p>
-              <p>Phone: {contact.contact_user?.phone_number}</p>
-              <p>Relationship: {contact.relationship}</p>
+              <p>Mail: {contact.contact_user?.email}</p>
+              <p>Broj telefona: {contact.contact_user?.phone_number}</p>
+              <p>Veza: {contact.relationship}</p>
 
               <button
                 onClick={() => handleDelete(contact.id)}
                 style={styles.deleteButton}
               >
-                Remove
+                Obriši
               </button>
             </div>
           ))
@@ -161,10 +172,12 @@ function EmergencyContacts() {
       </section>
 
       <section style={styles.card}>
-        <h2>Pending Invitations</h2>
+        <h2>Pozivi na čekanju</h2>
 
-        {invitations.length === 0 ? (
-          <p>No pending invitations.</p>
+        {loading ? (
+          <p style={styles.loader}>Učitavanje poziva...</p>
+        ) : invitations.length === 0 ? (
+          <p>Nema poziva na čekanju.</p>
         ) : (
           invitations.map((invitation) => (
             <div key={invitation.id} style={styles.item}>
@@ -174,10 +187,7 @@ function EmergencyContacts() {
               <p>Email: {invitation.email}</p>
               <p>Broj telefona: {invitation.phone_number}</p>
               <p>Veza: {invitation.relationship}</p>
-              <p>
-                Status:{' '}
-                {invitation.accepted_at ? 'Accepted' : 'Pending'}
-              </p>
+              <p>Status: {invitation.accepted_at ? 'Prihvaćen' : 'Na čekanju'}</p>
             </div>
           ))
         )}
@@ -237,6 +247,10 @@ const styles = {
   item: {
     borderBottom: '1px solid #e0f7fa',
     padding: '10px 0',
+  },
+  loader: {
+    color: '#3f51b5',
+    fontWeight: 'bold',
   },
   error: {
     color: '#d32f2f',

@@ -23,7 +23,7 @@ class SosAlertNotification extends Notification
     {
         return [
             'kind' => 'sos_alert',
-            'title' => 'SOS Alert',
+            'title' => 'SOS UPOZORENJE',
             'message' => $this->patientUser->username . ' trazi hitnu pomoc',
             'patient_user_id' => $this->patientUser->id,
             'sound' => true,

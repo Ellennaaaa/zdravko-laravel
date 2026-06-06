@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Constants\HealthConstants;
 use App\Models\EmergencyContact;
 use App\Notifications\CriticalGlucoseAlertNotification;
+use App\Services\EducationalAdviceService;
 
 class MeasurementController extends ApiController
 {
@@ -107,13 +108,17 @@ class MeasurementController extends ApiController
                 'measured_on' => $validated['measured_on'] ?? null,
             ])->load(['patient', 'bloodGlucoseUnit']);
 
+            $advice = app(EducationalAdviceService::class)
+                 ->getAdviceForPatient($user->patient);
+
             $this->sendCriticalAlertIfNeeded($measurement);
 
 
-            return $this->respond([
-                'message' => 'Measurement created successfully.',
-                'measurement' => $measurement,
-            ], 201);
+           return $this->respond([
+            'message' => 'Measurement created successfully.',
+            'measurement' => $measurement,
+            'advice' => $advice,
+        ], 201); 
         } catch (\Throwable $e) {
             return response()->json([
                 'error' => $e->getMessage(),

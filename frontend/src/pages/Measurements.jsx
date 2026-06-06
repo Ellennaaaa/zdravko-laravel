@@ -5,6 +5,7 @@ import {
   updateMeasurement,
   deleteMeasurement,
 } from '../api/measurements'
+import EducationalAdvicePopup from '../components/EducativeAdvice'
 
 function Measurements() {
   const [measurements, setMeasurements] = useState([])
@@ -13,23 +14,29 @@ function Measurements() {
     blood_glucose_unit_id: 1,
     measured_on: '',
   })
-
+  const [loading, setLoading] = useState(true)
   const [editingId, setEditingId] = useState(null)
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
+  const [advice, setAdvice] = useState(null)
 
   useEffect(() => {
     fetchMeasurements()
   }, [])
 
-  const fetchMeasurements = async () => {
-    try {
-      const response = await getMeasurements()
-      setMeasurements(response.data.measurements)
-    } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load measurements.')
-    }
+ const fetchMeasurements = async () => {
+  setLoading(true)
+
+  try {
+    const response = await getMeasurements()
+    setMeasurements(response.data.measurements || [])
+  } catch (err) {
+    console.error('Greška', err)
+    setError('Greška')
+  } finally {
+    setLoading(false)
   }
+}
 
   const handleChange = (e) => {
     setFormData({
@@ -55,10 +62,11 @@ function Measurements() {
     try {
       if (editingId) {
         await updateMeasurement(editingId, formData)
-        setSuccess('Measurement updated successfully.')
+        setSuccess('Mjerenje je uspješno ažurirano.')
       } else {
-        await storeMeasurement(formData)
-        setSuccess('Measurement added successfully.')
+        const response = await storeMeasurement(formData)
+        setAdvice(response.data.advice)
+        setSuccess('Mjerenje je uspješno dodato.')
       }
 
       resetForm()
@@ -68,19 +76,9 @@ function Measurements() {
         const errors = err.response.data.errors
         setError(Object.values(errors).flat().join(', '))
       } else {
-        setError(err.response?.data?.error || 'Something went wrong.')
+        setError(err.response?.data?.error || 'Greška')
       }
     }
-  }
-
-  const handleEdit = (measurement) => {
-    setEditingId(measurement.id)
-
-    setFormData({
-      value: measurement.value,
-      blood_glucose_unit_id: measurement.blood_glucose_unit_id,
-      measured_on: measurement.measured_on || '',
-    })
   }
 
   const handleDelete = async (id) => {
@@ -89,10 +87,10 @@ function Measurements() {
 
     try {
       await deleteMeasurement(id)
-      setSuccess('Measurement deleted successfully.')
+      setSuccess('Mjerenje je uspješno izbrisano')
       fetchMeasurements()
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to delete measurement.')
+      setError(err.response?.data?.message || 'Greška')
     }
   }
 
@@ -133,7 +131,7 @@ function Measurements() {
         />
 
         <button type="submit" style={styles.button}>
-          {editingId ? 'Azuriraj mjerenje' : 'Dodaj mjerenje'}
+          {editingId ? 'Ažurirajte mjerenje' : 'Dodajte mjerenje'}
         </button>
 
         {editingId && (
@@ -143,17 +141,19 @@ function Measurements() {
         )}
       </form>
 
-      <h2 style={styles.subtitle}>Istorija</h2>
+      <h2 style={styles.subtitle}>Dnevnik mjerenja</h2>
 
-      {measurements.length === 0 ? (
-        <p>No measurements yet.</p>
+      {loading ? (
+        <p>Učitavanje mjerenja...</p>
+      ) : measurements.length === 0 ? (
+        <p>Još uvijek nema mjerenja.</p>
       ) : (
         <table style={styles.table}>
           <thead>
             <tr>
               <th>Vrijednost</th>
               <th>Jedinica mjere</th>
-              <th>Datum</th>
+              <th>Vrijeme</th>
               <th>Akcije</th>
             </tr>
           </thead>
@@ -163,7 +163,13 @@ function Measurements() {
               <tr key={measurement.id}>
                 <td>{measurement.value}</td>
                 <td>{measurement.blood_glucose_unit?.symbol}</td>
-                <td>{new Date(measurement.measured_on).toLocaleDateString() || '—'}</td>
+                <td>
+                    {new Date(measurement.created_at).toLocaleDateString()} {' '}
+                    {new Date(measurement.created_at).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
+                  </td>
                 <td>
                   <button
                     onClick={() => handleEdit(measurement)}
@@ -176,7 +182,7 @@ function Measurements() {
                     onClick={() => handleDelete(measurement.id)}
                     style={styles.deleteButton}
                   >
-                    Izbrisi
+                    Obriši
                   </button>
                 </td>
               </tr>
@@ -184,6 +190,10 @@ function Measurements() {
           </tbody>
         </table>
       )}
+      <EducationalAdvicePopup
+          advice={advice}
+          onClose={() => setAdvice(null)}
+        />
     </div>
   )
 }
@@ -248,6 +258,7 @@ const styles = {
   table: {
     width: '100%',
     borderCollapse: 'collapse',
+    textAlign: 'center',
   },
   success: {
     color: 'green',

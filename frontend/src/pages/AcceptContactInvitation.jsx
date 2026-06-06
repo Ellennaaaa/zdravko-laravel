@@ -77,7 +77,7 @@ function AcceptContactInvitation() {
           <input
             name="password"
             type="password"
-            placeholder="Password"
+            placeholder="Lozinka"
             value={formData.password}
             onChange={handleChange}
             style={styles.input}
@@ -86,14 +86,14 @@ function AcceptContactInvitation() {
           <input
             name="password_confirmation"
             type="password"
-            placeholder="Confirm password"
+            placeholder="Potvrdite lozinku"
             value={formData.password_confirmation}
             onChange={handleChange}
             style={styles.input}
           />
 
           <button type="submit" style={styles.button}>
-            Prihvati poziv
+            Prihvatite poziv
           </button>
         </form>
       </div>
