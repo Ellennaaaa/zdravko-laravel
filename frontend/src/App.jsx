@@ -4,6 +4,7 @@ import { getUser } from './api/auth'
 import Layout from './components/Layout'
 import AdminPanel from './pages/AdminPanel'
 
+import ContactDashboard from './pages/ContactDashboard'
 import Register from './pages/Register'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -13,6 +14,8 @@ import EmergencyContacts from './pages/EmergencyContacts'
 import AcceptContactInvitation from './pages/AcceptContactInvitation'
 import SmartGlucometers from './pages/SmartGlucometers'
 import Profile from './pages/Profile'
+import BecomePatient from './pages/BecomePatient'
+
 
 function App() {
   const [user, setUser] = useState(null)
@@ -37,6 +40,8 @@ function App() {
       <Route path="/emergency-contacts" element={<Layout user={user}><EmergencyContacts /></Layout>} />
       <Route path="/smart-glucometers" element={<Layout user={user}><SmartGlucometers /></Layout>}/>
       <Route path="/profile" element={<Layout user={user}><Profile user={user} setUser={setUser} /></Layout>}/>
+      <Route path="/become-patient" element={<Layout user={user}><BecomePatient setUser={setUser} /></Layout>}/>
+      <Route path="/contact-dashboard" element={<Layout user={user}><ContactDashboard /></Layout>}/>
       <Route path="/admin" element={user?.roles?.some(role => role.name === 'admin') ? (<Layout user={user}><AdminPanel /></Layout>): <Navigate to="/dashboard" />}/>
     </Routes>
   )

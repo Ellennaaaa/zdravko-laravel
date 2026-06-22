@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import {
   getUnreadNotifications,
   markNotificationAsRead,
@@ -7,45 +7,55 @@ import {
 function NotificationBell() {
   const [notifications, setNotifications] = useState([])
   const [open, setOpen] = useState(false)
-  
+  const audioRef = useRef(null)   // ← keep the same instance
 
   useEffect(() => {
     fetchNotifications()
-
-    const interval = setInterval(() => {
-      fetchNotifications()
-    }, 10000)
-
+    const interval = setInterval(fetchNotifications, 10000)
     return () => clearInterval(interval)
   }, [])
 
   const playAlarm = () => {
-    const audio = new Audio('/Alarm-Clock-Short-chosic.com_.mp3')
-    audio.play().catch(() => {
-      console.log('Sound blocked until user interacts with page.')
-    })
-  }
-
- const fetchNotifications = async () => {
-  try {
-    const response = await getUnreadNotifications()
-    const unread = response.data.notifications || []
-
-    if (unread.length > 0) {
-      playAlarm()
-      setOpen(true)
+    // Stop any already-playing alarm before starting a new one
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
     }
-
-    setNotifications(unread)
-  } catch (err) {
-    console.error('Failed to fetch notifications', err)
+    const audio = new Audio('/Alarm-Clock-Short-chosic.com_.mp3')
+    audioRef.current = audio
+    audio.play().catch(() => console.log('Sound blocked until user interacts with page.'))
   }
-}
+
+  const stopAlarm = () => {
+    if (audioRef.current) {
+      audioRef.current.pause()
+      audioRef.current.currentTime = 0
+      audioRef.current = null
+    }
+  }
+
+  const fetchNotifications = async () => {
+    try {
+      const response = await getUnreadNotifications()
+      const unread = response.data.notifications || []
+      if (unread.length > 0) {
+        playAlarm()
+        setOpen(true)
+      }
+      setNotifications(unread)
+    } catch (err) {
+      console.error('Failed to fetch notifications', err)
+    }
+  }
 
   const markAsRead = async (id) => {
     try {
       await markNotificationAsRead(id)
-      fetchNotifications()
+      const response = await getUnreadNotifications()
+      const unread = response.data.notifications || []
+      setNotifications(unread)
+      // Stop the alarm only when there are no more unread notifications
+      if (unread.length === 0) stopAlarm()
     } catch (err) {
       console.error('Failed to mark notification as read', err)
     }

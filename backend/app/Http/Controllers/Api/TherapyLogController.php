@@ -58,7 +58,7 @@ class TherapyLogController extends ApiController
 
         return $this->respond([
             'message' => 'Therapy log created successfully.',
-            'therapy_log' => $therapyLog,
+            'therapy_log' => $log,
             'advice' => $advice,
         ], 201);
     }

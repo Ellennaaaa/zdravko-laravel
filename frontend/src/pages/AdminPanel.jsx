@@ -6,6 +6,12 @@ import {
   getAdminSmartGlucometers,
 } from '../api/admin'
 
+import {
+  getAdminEducativeAdvices,
+  storeAdminEducativeAdvice,
+  deleteAdminEducativeAdvice,
+} from '../api/adminEducativeAdvices'
+
 function AdminPanel() {
   const [stats, setStats] = useState(null)
   const [users, setUsers] = useState([])
@@ -13,6 +19,17 @@ function AdminPanel() {
   const [glucometers, setGlucometers] = useState([])
   const [activeTab, setActiveTab] = useState('users')
   const [error, setError] = useState(null)
+
+  const [advices, setAdvices] = useState([])
+
+  const [adviceData, setAdviceData] = useState({
+    diabetes_type_id: '',
+    min_age: '',
+    max_age: '',
+    title: '',
+    content: '',
+    is_active: true,
+  })
 
   useEffect(() => {
     loadAdminData()
@@ -25,6 +42,9 @@ function AdminPanel() {
       const measurementsResponse = await getAdminMeasurements()
       const glucometersResponse = await getAdminSmartGlucometers()
 
+      const advicesResponse = await getAdminEducativeAdvices()
+      setAdvices(advicesResponse.data.advices || [])
+
       setStats(statsResponse.data)
       setUsers(usersResponse.data.users || [])
       setMeasurements(measurementsResponse.data.measurements || [])
@@ -33,6 +53,51 @@ function AdminPanel() {
       setError(err.response?.data?.message || 'Failed to load admin data.')
     }
   }
+
+  const handleAdviceChange = (e) => {
+  const { name, value, type, checked } = e.target
+
+  setAdviceData({
+    ...adviceData,
+    [name]: type === 'checkbox' ? checked : value,
+  })
+}
+
+const handleAdviceSubmit = async (e) => {
+  e.preventDefault()
+  setError(null)
+
+  try {
+    await storeAdminEducativeAdvice({
+      ...adviceData,
+      diabetes_type_id: adviceData.diabetes_type_id || null,
+      min_age: adviceData.min_age || null,
+      max_age: adviceData.max_age || null,
+    })
+
+    setAdviceData({
+      diabetes_type_id: '',
+      min_age: '',
+      max_age: '',
+      title: '',
+      content: '',
+      is_active: true,
+    })
+
+    loadAdminData()
+  } catch (err) {
+    setError(err.response?.data?.message || 'Failed to add advice.')
+  }
+}
+
+const handleDeleteAdvice = async (id) => {
+  try {
+    await deleteAdminEducativeAdvice(id)
+    loadAdminData()
+  } catch {
+    setError('Failed to delete advice.')
+  }
+}
 
   return (
     <div style={styles.container}>
@@ -59,6 +124,12 @@ function AdminPanel() {
         </button>
         <button onClick={() => setActiveTab('glucometers')} style={activeTab === 'glucometers' ? styles.activeButton : styles.button}>
           Pametni glukometri
+        </button>
+        <button
+          onClick={() => setActiveTab('advices')}
+          style={activeTab === 'advices' ? styles.activeButton : styles.button}
+        >
+          Educative Advices
         </button>
       </div>
 
@@ -144,6 +215,102 @@ function AdminPanel() {
           </table>
         </section>
       )}
+
+      {activeTab === 'advices' && (
+      <section style={styles.card}>
+        <h2>Edukativni savjeti</h2>
+
+        <form onSubmit={handleAdviceSubmit} style={styles.form}>
+          <select
+            name="diabetes_type_id"
+            value={adviceData.diabetes_type_id}
+            onChange={handleAdviceChange}
+            style={styles.input}
+          >
+            <option value="">Svi tipovi dijabetesa</option>
+            <option value="1">Tip 1</option>
+            <option value="2">Tip 2</option>
+          </select>
+
+          <input
+            name="min_age"
+            type="number"
+            placeholder="Donja granica godina"
+            value={adviceData.min_age}
+            onChange={handleAdviceChange}
+            style={styles.input}
+          />
+
+          <input
+            name="max_age"
+            type="number"
+            placeholder="Gornja granica godina"
+            value={adviceData.max_age}
+            onChange={handleAdviceChange}
+            style={styles.input}
+          />
+
+          <input
+            name="title"
+            placeholder="Naslov savjeta"
+            value={adviceData.title}
+            onChange={handleAdviceChange}
+            style={styles.input}
+          />
+
+          <textarea
+            name="content"
+            placeholder="Sadržaj savjeta"
+            value={adviceData.content}
+            onChange={handleAdviceChange}
+            style={styles.textarea}
+          />
+
+          <label>
+            <input
+              name="is_active"
+              type="checkbox"
+              checked={adviceData.is_active}
+              onChange={handleAdviceChange}
+            />
+            Aktivan
+          </label>
+
+          <button type="submit" style={styles.button}>
+            Dodaj savjet
+          </button>
+        </form>
+
+        <hr />
+
+        {advices.length === 0 ? (
+          <p>No educative advices yet.</p>
+        ) : (
+          advices.map((advice) => (
+            <div key={advice.id} style={styles.item}>
+              <h3>{advice.title}</h3>
+              <p>{advice.content}</p>
+              <p>
+                Diabetes type:{' '}
+                {advice.diabetes_type_id ? advice.diabetes_type_id : 'All'}
+              </p>
+              <p>
+                Age:{' '}
+                {advice.min_age ?? 'any'} - {advice.max_age ?? 'any'}
+              </p>
+              <p>Status: {advice.is_active ? 'Active' : 'Inactive'}</p>
+
+              <button
+                onClick={() => handleDeleteAdvice(advice.id)}
+                style={styles.deleteButton}
+              >
+                Delete
+              </button>
+            </div>
+          ))
+        )}
+      </section>
+    )}
     </div>
   )
 }
@@ -207,6 +374,40 @@ const styles = {
   error: {
     color: '#d32f2f',
   },
+
+  form: {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '10px',
+  marginBottom: '20px',
+},
+
+input: {
+  padding: '10px',
+  borderRadius: '6px',
+  border: '1px solid #b2ebf2',
+},
+
+textarea: {
+  padding: '10px',
+  borderRadius: '6px',
+  border: '1px solid #b2ebf2',
+  minHeight: '80px',
+},
+
+item: {
+  borderBottom: '1px solid #e0f7fa',
+  padding: '12px 0',
+},
+
+deleteButton: {
+  padding: '7px 10px',
+  border: 'none',
+  borderRadius: '6px',
+  backgroundColor: '#d32f2f',
+  color: 'white',
+  cursor: 'pointer',
+},
 }
 
 export default AdminPanel

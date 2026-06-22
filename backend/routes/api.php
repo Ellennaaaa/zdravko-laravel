@@ -13,6 +13,8 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\Api\SmartGlucometerController;
 use App\Http\Controllers\Api\SosController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\AdminEducativeAdviceController;
+use App\Http\Controllers\Api\RoleUpgradeController;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -60,6 +62,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/smart-glucometers/{id}', [SmartGlucometerController::class, 'destroy']);
 
     Route::post('/sos', [SosController::class, 'send']);
+    Route::post('/become-patient', [RoleUpgradeController::class, 'becomePatient']);
 });
 
 Route::post('/contact-invitations/accept', [EmergencyContactInvitationController::class, 'accept']);
@@ -69,4 +72,8 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/admin/users', [AdminController::class, 'users']);
     Route::get('/admin/measurements', [AdminController::class, 'measurements']);
     Route::get('/admin/smart-glucometers', [AdminController::class, 'smartGlucometers']);
+
+    Route::get('/admin/educative-advices', [AdminEducativeAdviceController::class, 'index']);
+    Route::post('/admin/educative-advices', [AdminEducativeAdviceController::class, 'store']);
+    Route::delete('/admin/educative-advices/{id}', [AdminEducativeAdviceController::class, 'destroy']);
 });

@@ -6,30 +6,43 @@ import { sendSos } from '../api/sos'
 
 function Layout({ children, user }) {
   const location = useLocation()
+  const navigate = useNavigate()
   const roleNames = user?.roles?.map((role) => role.name) || []
 
+  const isAdmin = roleNames.includes('admin')
   const isPatient = roleNames.includes('patient')
   const isContact = roleNames.includes('contact')
-
-  const navigate = useNavigate()
+  const isPatientContact = isPatient && isContact
 
   const patientLinks = [
-    { path: '/dashboard', label: 'Dijagrami' },
-    { path: '/measurements', label: 'Mjerenja' },
-    { path: '/therapies', label: 'Terapija' },
-    { path: '/emergency-contacts', label: 'Hitni kontakti' },
-    { path: '/smart-glucometers', label: 'Pametni glukometri' }
+    { path: '/dashboard', label: 'Dashboard' },
+    { path: '/measurements', label: 'Measurements' },
+    { path: '/therapies', label: 'Therapies' },
+    { path: '/emergency-contacts', label: 'Emergency Contacts' },
+    { path: '/smart-glucometers', label: 'Smart Glucometers' },
   ]
 
   const contactLinks = [
-    { path: '/dashboard', label: 'Dijagrami' },
+    { path: '/contact-dashboard', label: 'Patient Dashboard' },
+    { path: '/become-patient', label: 'Become Patient' },
   ]
 
-  const isAdmin = roleNames.includes('admin')
+  const patientContactLinks = [
+    ...patientLinks,
+    { path: '/contact-dashboard', label: 'Monitored Patients' },
+  ]
 
   const adminLinks = [
     { path: '/admin', label: 'Admin Panel' },
   ]
+
+  const links = isAdmin
+    ? adminLinks
+    : isPatientContact
+      ? patientContactLinks
+      : isPatient
+        ? patientLinks
+        : contactLinks
 
   const handleSos = async () => {
   const confirmed = window.confirm(
@@ -50,7 +63,6 @@ function Layout({ children, user }) {
   }
 }
 
- const links = isAdmin ? adminLinks : isPatient ? patientLinks : contactLinks
   return (
     <div style={styles.page}>
       <main style={styles.content}>
