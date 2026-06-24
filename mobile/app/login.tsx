@@ -1,32 +1,46 @@
 import { useState } from 'react'
+import axios from 'axios'
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, ScrollView } from 'react-native'
 import { useRouter } from 'expo-router'
 import AsyncStorage from '@react-native-async-storage/async-storage'
 import { login } from '../src/api/auth'
+import { registerForPushNotificationsAsync } from '../src/services/pushNotifications'
 
 export default function Login() {
   const router = useRouter()
   const [formData, setFormData] = useState({ email: '', password: '' })
-  const [error, setError] = useState(null)
-  const [success, setSuccess] = useState(null)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   const handleSubmit = async () => {
-    setError(null)
-    setSuccess(null)
+  setError('')
+  setSuccess('')
+
+  try {
+    const response = await login(formData)
+
+    await AsyncStorage.setItem('token', response.data.token)
+
+    setSuccess(response.data.message)
+
     try {
-      const response = await login(formData)
-      await AsyncStorage.setItem('token', response.data.token)
-      setSuccess(response.data.message)
-      router.replace('/dashboard')
-    } catch (err) {
-      if (err.response?.status === 422) {
-        const errors = err.response.data.errors
-        setError(Object.values(errors).flat().join(', '))
-      } else {
-        setError(err.response?.data?.message || 'Something went wrong')
-      }
+      await registerForPushNotificationsAsync()
+    } catch (pushError) {
+      console.log('Push notification registration failed:', pushError)
     }
+
+    router.replace('/dashboard')
+  } catch (err: unknown) {
+  if (axios.isAxiosError(err) && err.response?.status === 422) {
+    const errors = err.response.data.errors
+    setError(Object.values(errors).flat().join(', '))
+  } else if (axios.isAxiosError(err)) {
+    setError(err.response?.data?.message || 'Something went wrong')
+  } else {
+    setError('Something went wrong')
   }
+}
+}
 
   return (
     <ScrollView contentContainerStyle={styles.container}>

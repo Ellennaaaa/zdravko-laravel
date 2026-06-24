@@ -42,6 +42,14 @@ class SendHealthReminders extends Command
             if (! $lastMeasurement) {
                 if (! $this->hasUnreadMeasurementReminder($patient->user)) {
                     $patient->user->notify(new MeasurementReminderNotification());
+                    app(\App\Services\PushNotificationService::class)->sendToUser(
+                        $patient->user,
+                        'Blood glucose reminder',
+                        'You have not measured your blood glucose recently.',
+                        [
+                            'type' => 'measurement_reminder',
+                        ]
+                    );
                 }
                 continue;
             }
@@ -106,6 +114,16 @@ class SendHealthReminders extends Command
             if ($hoursPassed >= $hoursBetweenDoses) {
                 if (! $this->hasUnreadTherapyReminder($user, $therapy->id)) {
                     $user->notify(new TherapyReminderNotification($therapy));
+
+                    app(\App\Services\PushNotificationService::class)->sendToUser(
+                        $user,
+                        'Therapy reminder',
+                        'It is time to take your therapy.',
+                        [
+                            'type' => 'therapy_reminder',
+                            'therapy_id' => $therapy->id,
+                        ]
+                    );
                 }
             }
         }

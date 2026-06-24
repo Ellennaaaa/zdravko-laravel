@@ -15,6 +15,9 @@ use App\Http\Controllers\Api\SosController;
 use App\Http\Controllers\Api\AdminController;
 use App\Http\Controllers\Api\AdminEducativeAdviceController;
 use App\Http\Controllers\Api\RoleUpgradeController;
+use App\Http\Controllers\Api\PushTokenController;
+use Illuminate\Support\Facades\Http;
+use App\Models\PushToken;
 
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
@@ -63,6 +66,8 @@ Route::middleware('auth:sanctum')->group(function () {
 
     Route::post('/sos', [SosController::class, 'send']);
     Route::post('/become-patient', [RoleUpgradeController::class, 'becomePatient']);
+
+    Route::post('/push-token', [PushTokenController::class, 'store']);
 });
 
 Route::post('/contact-invitations/accept', [EmergencyContactInvitationController::class, 'accept']);
@@ -76,4 +81,23 @@ Route::middleware(['auth:sanctum', 'admin'])->group(function () {
     Route::get('/admin/educative-advices', [AdminEducativeAdviceController::class, 'index']);
     Route::post('/admin/educative-advices', [AdminEducativeAdviceController::class, 'store']);
     Route::delete('/admin/educative-advices/{id}', [AdminEducativeAdviceController::class, 'destroy']);
+});
+
+Route::get('/test-push', function () {
+    $token = PushToken::latest()->first()?->token;
+
+    if (! $token) {
+        return response()->json([
+            'message' => 'No push token found.',
+        ], 404);
+    }
+
+    $response = Http::post('https://exp.host/--/api/v2/push/send', [
+        'to' => $token,
+        'title' => 'Zdravko',
+        'body' => 'Push notifications work!',
+        'sound' => 'default',
+    ]);
+
+    return response()->json($response->json());
 });

@@ -26,6 +26,15 @@ class SosController extends ApiController
                 $contact->contactUser->notify(
                     new SosAlertNotification($user)
                 );
+                app(\App\Services\PushNotificationService::class)->sendToUser(
+                $contact->contactUser,
+                'SOS alert',
+                $user->username . ' has sent an SOS alert.',
+                [
+                    'type' => 'sos',
+                    'patient_id' => $user->patient->id,
+                ]
+                );
             }
         }
 

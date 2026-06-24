@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "686597319702",
+    "project_id": "zdravko-mobile",
+    "storage_bucket": "zdravko-mobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:686597319702:android:caa57730f0fcd86f50d937",
+        "android_client_info": {
+          "package_name": "com.zdravko.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA43wifLSGSohqmWmig-YiE6mv8DwfVkCE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

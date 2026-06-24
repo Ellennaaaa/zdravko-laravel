@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "mobile",
-    "slug": "mobile",
+    "name": "zdravko mobile",
+    "slug": "zdravko-mobile",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "mobile",
+    "scheme": "zdravko",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -20,7 +20,8 @@
       },
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
-      "package": "com.zdravko.app"
+      "package": "com.zdravko.app",
+      "googleServicesFile": "./google-services.json"
     },
     "web": {
       "output": "static",
@@ -40,7 +41,9 @@
           }
         }
       ],
-      "@react-native-community/datetimepicker"
+      "@react-native-community/datetimepicker",
+      "react-native-ble-plx",
+      "expo-notifications"
     ],
     "experiments": {
       "typedRoutes": true,
@@ -49,9 +52,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "1ef56d8c-1105-441b-acae-f4347b36f347"
+        "projectId": "5524b055-2ba3-4d8d-ba1c-3e3712c7239f"
       }
     },
-    "owner": "tihomirmiladin"
+    "owner": "elena.ivanovic"
   }
 }

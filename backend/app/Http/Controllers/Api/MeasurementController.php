@@ -47,6 +47,15 @@ class MeasurementController extends ApiController
                 $contact->contactUser->notify(
                     new CriticalGlucoseAlertNotification($measurement)
                 );
+                app(\App\Services\PushNotificationService::class)->sendToUser(
+                $contact->contactUser,
+                'Critical glucose alert',
+                'Patient has a critical glucose value.',
+                [
+                    'type' => 'critical_glucose',
+                    'measurement_id' => $measurement->id,
+                ]
+            );
             }
         }
     }
