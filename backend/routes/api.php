@@ -101,3 +101,11 @@ Route::get('/test-push', function () {
 
     return response()->json($response->json());
 });
+
+Route::get('/admin/audit-logs', function () {
+    return response()->json(
+        \App\Models\AuditLog::with('user')
+            ->latest()
+            ->paginate(50)
+    );
+})->middleware(['auth:sanctum', 'admin']);

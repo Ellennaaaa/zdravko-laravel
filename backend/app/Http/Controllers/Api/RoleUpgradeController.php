@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\BecomePatientRequest;
 use App\Models\Role;
+use App\Services\AuditService;
 
 class RoleUpgradeController extends ApiController
 {
@@ -30,6 +31,13 @@ class RoleUpgradeController extends ApiController
             'birth_date' => $validated['birth_date'],
             'diabetes_type_id' => $validated['diabetes_type_id'],
         ]);
+
+        AuditService::log(
+            action: 'user.became_patient',
+            model: 'User',
+            modelId: $user->id,
+            payload: ['diabetes_type_id' => $validated['diabetes_type_id']]
+        );
 
         return $this->respond([
             'message' => 'You are now registered as a patient.',

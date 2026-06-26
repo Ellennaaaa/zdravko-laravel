@@ -4,11 +4,12 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\MeasurementRequest;
 use App\Models\Measurement;
-use Illuminate\Http\Request;
-use App\Constants\HealthConstants;
 use App\Models\EmergencyContact;
 use App\Notifications\CriticalGlucoseAlertNotification;
+use App\Services\AuditService;
 use App\Services\EducationalAdviceService;
+use App\Constants\HealthConstants;
+use Illuminate\Http\Request;
 
 class MeasurementController extends ApiController
 {
@@ -48,17 +49,18 @@ class MeasurementController extends ApiController
                     new CriticalGlucoseAlertNotification($measurement)
                 );
                 app(\App\Services\PushNotificationService::class)->sendToUser(
-                $contact->contactUser,
-                'Critical glucose alert',
-                'Patient has a critical glucose value.',
-                [
-                    'type' => 'critical_glucose',
-                    'measurement_id' => $measurement->id,
-                ]
-            );
+                    $contact->contactUser,
+                    'Critical glucose alert',
+                    'Patient has a critical glucose value.',
+                    [
+                        'type' => 'critical_glucose',
+                        'measurement_id' => $measurement->id,
+                    ]
+                );
             }
         }
     }
+
     public function index(Request $request)
     {
         $user = $request->user()->load('patient');
@@ -118,16 +120,23 @@ class MeasurementController extends ApiController
             ])->load(['patient', 'bloodGlucoseUnit']);
 
             $advice = app(EducationalAdviceService::class)
-                 ->getAdviceForPatient($user->patient);
+                ->getAdviceForPatient($user->patient);
 
             $this->sendCriticalAlertIfNeeded($measurement);
 
+            AuditService::log(
+                action: 'measurement.created',
+                model: 'Measurement',
+                modelId: $measurement->id,
+                payload: $validated
+            );
 
-           return $this->respond([
-            'message' => 'Measurement created successfully.',
-            'measurement' => $measurement,
-            'advice' => $advice,
-        ], 201); 
+            return $this->respond([
+                'message' => 'Measurement created successfully.',
+                'measurement' => $measurement,
+                'advice' => $advice,
+            ], 201);
+
         } catch (\Throwable $e) {
             return response()->json([
                 'error' => $e->getMessage(),
@@ -155,10 +164,18 @@ class MeasurementController extends ApiController
             $measurement->update($request->validated());
             $measurement->load('bloodGlucoseUnit');
 
+            AuditService::log(
+                action: 'measurement.updated',
+                model: 'Measurement',
+                modelId: $measurement->id,
+                payload: $request->validated()
+            );
+
             return $this->respond([
                 'message' => 'Measurement updated successfully.',
                 'measurement' => $measurement,
             ]);
+
         } catch (\Throwable $e) {
             return response()->json([
                 'error' => $e->getMessage(),
@@ -183,11 +200,19 @@ class MeasurementController extends ApiController
         }
 
         try {
+            AuditService::log(
+                action: 'measurement.deleted',
+                model: 'Measurement',
+                modelId: $measurement->id,
+                payload: ['value' => $measurement->value, 'measured_on' => $measurement->measured_on]
+            );
+
             $measurement->delete();
 
             return $this->respond([
                 'message' => 'Measurement deleted successfully.',
             ]);
+
         } catch (\Throwable $e) {
             return response()->json([
                 'error' => $e->getMessage(),

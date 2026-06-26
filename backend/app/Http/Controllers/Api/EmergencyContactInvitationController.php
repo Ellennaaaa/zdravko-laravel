@@ -9,6 +9,7 @@ use App\Models\EmergencyContact;
 use App\Models\EmergencyContactInvitation;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\AuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -57,6 +58,13 @@ class EmergencyContactInvitationController extends ApiController
 
             Mail::to($invitation->email)->send(
                 new EmergencyContactInvitationMail($invitation)
+            );
+
+            AuditService::log(
+                action: 'emergency_contact.invitation_sent',
+                model: 'EmergencyContactInvitation',
+                modelId: $invitation->id,
+                payload: ['email' => $validated['email'], 'relationship' => $validated['relationship']]
             );
 
             return $this->respond([
@@ -137,6 +145,13 @@ class EmergencyContactInvitationController extends ApiController
                     'token' => $token,
                 ];
             });
+
+            AuditService::log(
+                action: 'emergency_contact.invitation_accepted',
+                model: 'EmergencyContact',
+                modelId: $result['contact']->id,
+                payload: ['patient_id' => $result['contact']->patient_id]
+            );
 
             return $this->respond([
                 'message' => 'Invitation accepted successfully.',

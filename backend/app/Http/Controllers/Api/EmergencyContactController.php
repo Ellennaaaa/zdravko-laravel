@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\EmergencyContact;
+use App\Services\AuditService;
 use Illuminate\Http\Request;
 
 class EmergencyContactController extends ApiController
@@ -40,6 +41,13 @@ class EmergencyContactController extends ApiController
         if (! $contact) {
             return $this->respondNotFound('Emergency contact not found.');
         }
+
+        AuditService::log(
+            action: 'emergency_contact.deleted',
+            model: 'EmergencyContact',
+            modelId: $contact->id,
+            payload: ['contact_user_id' => $contact->contact_user_id]
+        );
 
         $contact->delete();
 

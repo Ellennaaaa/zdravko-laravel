@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\SmartGlucometerRequest;
 use App\Models\SmartGlucometer;
+use App\Services\AuditService;
 use Illuminate\Http\Request;
 
 class SmartGlucometerController extends ApiController
@@ -37,6 +38,13 @@ class SmartGlucometerController extends ApiController
             'is_active' => $request->validated()['is_active'] ?? true,
         ]);
 
+        AuditService::log(
+            action: 'glucometer.added',
+            model: 'SmartGlucometer',
+            modelId: $glucometer->id,
+            payload: $request->validated()
+        );
+
         return $this->respond([
             'message' => 'Smart glucometer added successfully.',
             'smart_glucometer' => $glucometer,
@@ -54,6 +62,13 @@ class SmartGlucometerController extends ApiController
         if (! $glucometer) {
             return $this->respondNotFound('Smart glucometer not found.');
         }
+
+        AuditService::log(
+            action: 'glucometer.deleted',
+            model: 'SmartGlucometer',
+            modelId: $glucometer->id,
+            payload: ['device_name' => $glucometer->device_name ?? null]
+        );
 
         $glucometer->delete();
 

@@ -7,11 +7,14 @@ use App\Models\Measurement;
 use App\Models\Therapy;
 use App\Models\SmartGlucometer;
 use App\Models\EmergencyContact;
+use App\Services\AuditService;
 
 class AdminController extends ApiController
 {
     public function stats()
     {
+        AuditService::log(action: 'admin.viewed_stats');
+
         return $this->respond([
             'users_count' => User::count(),
             'measurements_count' => Measurement::count(),
@@ -23,6 +26,8 @@ class AdminController extends ApiController
 
     public function users()
     {
+        AuditService::log(action: 'admin.viewed_users');
+
         return $this->respond([
             'users' => User::with('roles')
                 ->latest()
@@ -32,6 +37,8 @@ class AdminController extends ApiController
 
     public function measurements()
     {
+        AuditService::log(action: 'admin.viewed_measurements');
+
         return $this->respond([
             'measurements' => Measurement::with([
                 'patient.user',
@@ -42,6 +49,8 @@ class AdminController extends ApiController
 
     public function smartGlucometers()
     {
+        AuditService::log(action: 'admin.viewed_smart_glucometers');
+
         return $this->respond([
             'smart_glucometers' => SmartGlucometer::with([
                 'patient.user',

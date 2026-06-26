@@ -7,6 +7,7 @@ use App\Models\BloodGlucoseUnit;
 use App\Models\EmergencyContact;
 use App\Models\Measurement;
 use App\Notifications\CriticalGlucoseAlertNotification;
+use App\Services\AuditService;
 use Illuminate\Http\Request;
 
 class BluetoothGlucoseController extends ApiController
@@ -35,6 +36,13 @@ class BluetoothGlucoseController extends ApiController
         ])->load(['patient', 'bloodGlucoseUnit']);
 
         $this->sendCriticalAlertIfNeeded($measurement);
+
+        AuditService::log(
+            action: 'bluetooth.glucose_simulated',
+            model: 'Measurement',
+            modelId: $measurement->id,
+            payload: ['value' => $value, 'unit' => 'mmol/L']
+        );
 
         return $this->respond([
             'message' => 'Bluetooth glucose measurement simulated successfully.',

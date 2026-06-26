@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\TherapyRequest;
 use App\Models\Therapy;
+use App\Services\AuditService;
 use Illuminate\Http\Request;
 
 class TherapyController extends ApiController
@@ -39,6 +40,13 @@ class TherapyController extends ApiController
             'patient_id' => $user->patient->id,
         ])->load(['medicine', 'unit']);
 
+        AuditService::log(
+            action: 'therapy.created',
+            model: 'Therapy',
+            modelId: $therapy->id,
+            payload: $request->validated()
+        );
+
         return $this->respond([
             'message' => 'Therapy created successfully.',
             'therapy' => $therapy,
@@ -63,6 +71,13 @@ class TherapyController extends ApiController
 
         $therapy->update($request->validated());
 
+        AuditService::log(
+            action: 'therapy.updated',
+            model: 'Therapy',
+            modelId: $therapy->id,
+            payload: $request->validated()
+        );
+
         return $this->respond([
             'message' => 'Therapy updated successfully.',
             'therapy' => $therapy->load(['medicine', 'unit']),
@@ -84,6 +99,12 @@ class TherapyController extends ApiController
         if (! $therapy) {
             return $this->respondNotFound('Therapy not found.');
         }
+
+        AuditService::log(
+            action: 'therapy.deleted',
+            model: 'Therapy',
+            modelId: $therapy->id
+        );
 
         $therapy->delete();
 

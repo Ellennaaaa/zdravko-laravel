@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\EducationalAdvice;
+use App\Services\AuditService;
 use Illuminate\Http\Request;
 
 class AdminEducativeAdviceController extends ApiController
@@ -30,6 +31,13 @@ class AdminEducativeAdviceController extends ApiController
             'is_active' => $validated['is_active'] ?? true,
         ]);
 
+        AuditService::log(
+            action: 'admin.advice_created',
+            model: 'EducationalAdvice',
+            modelId: $advice->id,
+            payload: ['title' => $advice->title]
+        );
+
         return $this->respond([
             'message' => 'Educative advice created successfully.',
             'advice' => $advice,
@@ -43,6 +51,13 @@ class AdminEducativeAdviceController extends ApiController
         if (! $advice) {
             return $this->respondNotFound('Advice not found.');
         }
+
+        AuditService::log(
+            action: 'admin.advice_deleted',
+            model: 'EducationalAdvice',
+            modelId: $advice->id,
+            payload: ['title' => $advice->title]
+        );
 
         $advice->delete();
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\PushToken;
+use App\Services\AuditService;
 use Illuminate\Http\Request;
 
 class PushTokenController extends ApiController
@@ -16,6 +17,12 @@ class PushTokenController extends ApiController
         PushToken::updateOrCreate(
             ['token' => $validated['token']],
             ['user_id' => $request->user()->id]
+        );
+
+        AuditService::log(
+            action: 'push_token.saved',
+            model: 'User',
+            modelId: $request->user()->id
         );
 
         return $this->respond([

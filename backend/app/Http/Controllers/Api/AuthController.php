@@ -7,6 +7,7 @@ use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\AuditService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,6 +43,13 @@ class AuthController extends ApiController
 
             $token = $user->createToken('auth_token')->plainTextToken;
 
+            AuditService::log(
+                action: 'user.registered',
+                model: 'User',
+                modelId: $user->id,
+                payload: ['username' => $user->username, 'email' => $user->email, 'role' => $validated['role']]
+            );
+
             return $this->respond([
                 'message' => 'Registration successful.',
                 'token' => $token,
@@ -62,12 +70,22 @@ class AuthController extends ApiController
         $credentials = $request->validated();
 
         if (! auth()->attempt($credentials)) {
+            AuditService::log(
+                action: 'user.login_failed',
+                payload: ['email' => $credentials['email']]
+            );
             return $this->respondUnauthorized('Invalid credentials.');
         }
 
         $user = User::where('email', $credentials['email'])->firstOrFail();
 
         $token = $user->createToken('auth_token')->plainTextToken;
+
+        AuditService::log(
+            action: 'user.login',
+            model: 'User',
+            modelId: $user->id
+        );
 
         return $this->respond([
             'message' => 'Login successful.',
@@ -85,6 +103,12 @@ class AuthController extends ApiController
 
     public function logout(Request $request)
     {
+        AuditService::log(
+            action: 'user.logout',
+            model: 'User',
+            modelId: $request->user()->id
+        );
+
         $request->user()->currentAccessToken()->delete();
 
         return $this->respond([

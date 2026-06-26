@@ -5,8 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Requests\TherapyLogRequest;
 use App\Models\Therapy;
 use App\Models\TherapyLog;
-use Illuminate\Http\Request;
+use App\Services\AuditService;
 use App\Services\EducationalAdviceService;
+use Illuminate\Http\Request;
 
 class TherapyLogController extends ApiController
 {
@@ -52,9 +53,16 @@ class TherapyLogController extends ApiController
             ...$validated,
             'patient_id' => $user->patient->id,
         ])->load(['therapy', 'medicine', 'unit']);
-        
+
         $advice = app(EducationalAdviceService::class)
-             ->getAdviceForPatient($user->patient);
+            ->getAdviceForPatient($user->patient);
+
+        AuditService::log(
+            action: 'therapy_log.created',
+            model: 'TherapyLog',
+            modelId: $log->id,
+            payload: $validated
+        );
 
         return $this->respond([
             'message' => 'Therapy log created successfully.',
@@ -78,6 +86,12 @@ class TherapyLogController extends ApiController
         if (! $log) {
             return $this->respondNotFound('Therapy log not found.');
         }
+
+        AuditService::log(
+            action: 'therapy_log.deleted',
+            model: 'TherapyLog',
+            modelId: $log->id
+        );
 
         $log->delete();
 
