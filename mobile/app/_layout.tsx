@@ -6,7 +6,8 @@ import { usePathname } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getUser } from '../src/api/auth';
 import BottomNav from '../components/BottomNav';
-import SosButton from '../components/SosButton'
+import SosButton from '../components/SosButton';
+
 
 const PUBLIC_ROUTES = ['/login', '/register', '/index', '/'];
 
