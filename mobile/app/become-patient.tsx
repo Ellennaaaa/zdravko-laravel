@@ -32,6 +32,7 @@ export default function BecomePatientScreen() {
 
       <TextInput
         placeholder="Birth date: YYYY-MM-DD"
+          placeholderTextColor="#999"
         value={birthDate}
         onChangeText={setBirthDate}
         style={styles.input}
@@ -39,6 +40,7 @@ export default function BecomePatientScreen() {
 
       <TextInput
         placeholder="Diabetes type ID: 1 or 2"
+          placeholderTextColor="#999"
         value={diabetesTypeId}
         onChangeText={setDiabetesTypeId}
         keyboardType="numeric"

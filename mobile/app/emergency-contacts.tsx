@@ -30,7 +30,7 @@ export default function EmergencyContacts() {
       setContacts(contactsResponse.data.emergency_contacts)
       setInvitations(invitationsResponse.data.invitations)
     } catch {
-      setError('Neuspjesno ucitavanje hitnih kontakata.')
+      setError('Neuspješno učitavanje hitnih kontakata.')
     }
   }
 
@@ -39,14 +39,14 @@ export default function EmergencyContacts() {
     setSuccess(null)
     try {
       await sendEmergencyContactInvitation(formData)
-      setSuccess('Poziv za hitnog kontakta uspjesno poslat!')
+      setSuccess('Poziv za hitnog kontakta uspješno poslat!')
       setFormData({ name: '', email: '', phone_number: '', relationship: '' })
       loadData()
     } catch (err: any) {
       if (err.response?.status === 422) {
         setError(Object.values(err.response.data.errors).flat().join(', '))
       } else {
-        setError(err.response?.data?.error || 'Something went wrong.')
+        setError(err.response?.data?.error || '!')
       }
     }
   }
@@ -54,10 +54,10 @@ export default function EmergencyContacts() {
   const handleDelete = async (id: number) => {
     try {
       await deleteEmergencyContact(id)
-      setSuccess('Emergency contact removed.')
+      setSuccess('Hitni kontakt uklonjen.')
       loadData()
     } catch {
-      setError('Failed to delete emergency contact.')
+      setError('Neuspješno uklanjanje hitnog kontakta.')
     }
   }
 
@@ -78,12 +78,14 @@ export default function EmergencyContacts() {
         <TextInput
           style={styles.input}
           placeholder="Ime"
+          placeholderTextColor="#999"
           value={formData.name}
           onChangeText={(text) => setFormData({ ...formData, name: text })}
         />
         <TextInput
           style={styles.input}
           placeholder="Email"
+          placeholderTextColor="#999"
           value={formData.email}
           onChangeText={(text) => setFormData({ ...formData, email: text })}
           keyboardType="email-address"
@@ -92,6 +94,7 @@ export default function EmergencyContacts() {
         <TextInput
           style={styles.input}
           placeholder="Broj telefona"
+          placeholderTextColor="#999"
           value={formData.phone_number}
           onChangeText={(text) => setFormData({ ...formData, phone_number: text })}
           keyboardType="phone-pad"
@@ -99,6 +102,7 @@ export default function EmergencyContacts() {
         <TextInput
           style={styles.input}
           placeholder="Veza (član porodice, prijatelj ...)"
+          placeholderTextColor="#999"
           value={formData.relationship}
           onChangeText={(text) => setFormData({ ...formData, relationship: text })}
         />

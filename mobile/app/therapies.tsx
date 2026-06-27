@@ -52,7 +52,7 @@ export default function Therapies() {
       setTherapies(therapiesResponse.data.therapies)
       setTherapyLogs(logsResponse.data.therapy_logs)
     } catch {
-      setError('Failed to load therapy data.')
+      setError('Neuspješno učitavanje podataka o terapiji.')
     }
   }
 
@@ -60,7 +60,7 @@ export default function Therapies() {
     if (err.response?.status === 422) {
       setError(Object.values(err.response.data.errors).flat().join(', '))
     } else {
-      setError(err.response?.data?.error || 'Something went wrong.')
+      setError(err.response?.data?.error || '!')
     }
   }
 
@@ -69,7 +69,7 @@ export default function Therapies() {
     setSuccess(null)
     try {
       await storeTherapy(therapyData)
-      setSuccess('Therapy plan added successfully.')
+      setSuccess('Plan terapije dodat uspješno.')
         setTherapyData({
       medicine_id: 1,
       dosage: '',
@@ -91,13 +91,13 @@ export default function Therapies() {
     setSuccess(null)
     try {
       await storeTherapyLog(logData)
-      setSuccess('Therapy log added successfully.')
+      setSuccess('Zapis terapije dodat uspješno.')
       setLogData({
         therapy_id: '',
         medicine_id: 1,
         dosage: '',
         unit_id: 1,
-        taken_at: '',
+        taken_at: now,
         note: '',
       })
       loadData()
@@ -109,20 +109,20 @@ export default function Therapies() {
   const handleDeleteTherapy = async (id: number) => {
     try {
       await deleteTherapy(id)
-      setSuccess('Therapy deleted.')
+      setSuccess('Terapija izbrisana.')
       loadData()
     } catch {
-      setError('Failed to delete therapy.')
+      setError('Neuspješno brisanje terapije.')
     }
   }
 
   const handleDeleteLog = async (id: number) => {
     try {
       await deleteTherapyLog(id)
-      setSuccess('Therapy log deleted.')
+      setSuccess('Unijet zapis terapije.')
       loadData()
     } catch {
-      setError('Failed to delete therapy log.')
+      setError('Neuspješno dodavanje zapisa terapije.')
     }
   }
 
@@ -169,6 +169,8 @@ export default function Therapies() {
             <Picker
               selectedValue={therapyData.medicine_id}
               onValueChange={(value) => setTherapyData({ ...therapyData, medicine_id: value })}
+              style={{ color: '#000' }}
+              dropdownIconColor="#000"
             >
               <Picker.Item label="Insulin" value={1} />
               <Picker.Item label="Metformin" value={2} />
@@ -178,6 +180,7 @@ export default function Therapies() {
           <TextInput
             style={styles.input}
             placeholder="Doza"
+            placeholderTextColor="#999"
             value={therapyData.dosage}
             onChangeText={(text) => setTherapyData({ ...therapyData, dosage: text })}
             keyboardType="numeric"
@@ -188,6 +191,8 @@ export default function Therapies() {
             <Picker
               selectedValue={therapyData.unit_id}
               onValueChange={(value) => setTherapyData({ ...therapyData, unit_id: value })}
+              style={{ color: '#000' }}
+              dropdownIconColor="#000"
             >
               <Picker.Item label="mg" value={1} />
               <Picker.Item label="ml" value={2} />
@@ -199,6 +204,7 @@ export default function Therapies() {
           <TextInput
             style={styles.input}
             placeholder="Puta dnevno"
+            placeholderTextColor="#999"
             value={therapyData.times_per_day}
             onChangeText={(text) => setTherapyData({ ...therapyData, times_per_day: text })}
             keyboardType="numeric"
@@ -207,6 +213,7 @@ export default function Therapies() {
           <TextInput
             style={styles.input}
             placeholder="Vrijeme pocetka (HH:MM)"
+            placeholderTextColor="#999"
             value={therapyData.start_time}
             onChangeText={(text) => setTherapyData({ ...therapyData, start_time: text })}
           />
@@ -221,13 +228,15 @@ export default function Therapies() {
           <TextInput
             style={styles.input}
             placeholder="Datum kraja (YYYY-MM-DD)"
+            placeholderTextColor="#999"
             value={therapyData.end_date}
             onChangeText={(text) => setTherapyData({ ...therapyData, end_date: text })}
           />
 
           <TextInput
             style={[styles.input, styles.textarea]}
-            placeholder="Biljeska"
+            placeholder="Bilješka"
+            placeholderTextColor="#999"
             value={therapyData.note}
             onChangeText={(text) => setTherapyData({ ...therapyData, note: text })}
             multiline
@@ -272,8 +281,10 @@ export default function Therapies() {
             <Picker
               selectedValue={logData.therapy_id}
               onValueChange={(value) => setLogData({ ...logData, therapy_id: value })}
+              style={{ color: '#000' }}
+              dropdownIconColor="#000"
             >
-              <Picker.Item label="No linked therapy plan" value="" />
+              <Picker.Item label="Nema unijetog plana terapije" value="" />
               {therapies.map((therapy: any) => (
                 <Picker.Item
                   key={therapy.id}
@@ -289,6 +300,8 @@ export default function Therapies() {
             <Picker
               selectedValue={logData.medicine_id}
               onValueChange={(value) => setLogData({ ...logData, medicine_id: value })}
+              style={{ color: '#000' }}
+              dropdownIconColor="#000"
             >
               <Picker.Item label="Insulin" value={1} />
               <Picker.Item label="Metformin" value={2} />
@@ -298,6 +311,7 @@ export default function Therapies() {
           <TextInput
             style={styles.input}
             placeholder="Uzeta doza"
+            placeholderTextColor="#999"
             value={logData.dosage}
             onChangeText={(text) => setLogData({ ...logData, dosage: text })}
             keyboardType="numeric"
@@ -308,6 +322,8 @@ export default function Therapies() {
             <Picker
               selectedValue={logData.unit_id}
               onValueChange={(value) => setLogData({ ...logData, unit_id: value })}
+              style={{ color: '#000' }}
+              dropdownIconColor="#000"
             >
               <Picker.Item label="mg" value={1} />
               <Picker.Item label="ml" value={2} />
@@ -319,13 +335,15 @@ export default function Therapies() {
           <TextInput
             style={styles.input}
             placeholder="Uzeto u (YYYY-MM-DD HH:MM)"
+            placeholderTextColor="#999"
             value={logData.taken_at}
             onChangeText={(text) => setLogData({ ...logData, taken_at: text })}
           />
 
           <TextInput
             style={[styles.input, styles.textarea]}
-            placeholder="Biljeska"
+            placeholder="Bilješka"
+            placeholderTextColor="#999"
             value={logData.note}
             onChangeText={(text) => setLogData({ ...logData, note: text })}
             multiline

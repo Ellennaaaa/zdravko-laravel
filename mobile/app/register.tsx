@@ -41,7 +41,7 @@ export default function Register() {
             const errors = err.response.data.errors
             setError(Object.values(errors).flat().join(', '))
             } else {
-            setError(err.response?.data?.message || 'Something went wrong')
+            setError(err.response?.data?.message || '!')
             }
         }
         }
@@ -57,6 +57,7 @@ export default function Register() {
         <TextInput
             style={styles.input}
             placeholder="Username"
+              placeholderTextColor="#999"
             value={formData.username}
             onChangeText={(text) => setFormData({ ...formData, username: text })}
             autoCapitalize="none"
@@ -65,6 +66,7 @@ export default function Register() {
         <TextInput
             style={styles.input}
             placeholder="Email"
+              placeholderTextColor="#999"
             value={formData.email}
             onChangeText={(text) => setFormData({ ...formData, email: text })}
             keyboardType="email-address"
@@ -74,6 +76,7 @@ export default function Register() {
         <TextInput
             style={styles.input}
             placeholder="Lozinka"
+              placeholderTextColor="#999"
             value={formData.password}
             onChangeText={(text) => setFormData({ ...formData, password: text })}
             secureTextEntry
@@ -82,6 +85,7 @@ export default function Register() {
         <TextInput
           style={styles.input}
           placeholder="Potvrdi lozinku"
+            placeholderTextColor="#999"
           value={formData.password_confirmation}
           onChangeText={(text) => setFormData({ ...formData, password_confirmation: text })}
           secureTextEntry
@@ -90,6 +94,7 @@ export default function Register() {
         <TextInput
           style={styles.input}
           placeholder="Broj telefona"
+          placeholderTextColor="#999"
           value={formData.phone_number}
           onChangeText={(text) => setFormData({ ...formData, phone_number: text })}
           keyboardType="phone-pad"
@@ -100,6 +105,8 @@ export default function Register() {
           <Picker
             selectedValue={formData.role}
             onValueChange={(value) => setFormData({ ...formData, role: value })}
+            style={{ color: '#000' }}
+            dropdownIconColor="#000"
           >
             <Picker.Item label="Pacijent" value="patient" />
             <Picker.Item label="Kontakt" value="contact" />
@@ -137,6 +144,8 @@ export default function Register() {
               <Picker
                 selectedValue={formData.diabetes_type_id}
                 onValueChange={(value) => setFormData({ ...formData, diabetes_type_id: value })}
+                style={{ color: '#000' }}
+                dropdownIconColor="#000"
               >
                 <Picker.Item label="Dijabetes tipa 1" value={1} />
                 <Picker.Item label="Dijabetes tipa 2" value={2} />

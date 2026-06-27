@@ -11,7 +11,7 @@ export const formatDate = (dateString: string) => {
 export const formatDateTime = (dateString: string) => {
   if (!dateString) return '—'
   const date = new Date(dateString)
-  return date.toLocaleDateString('bs-BA', {
+  return date.toLocaleString('bs-BA', {
     day: '2-digit',
     month: '2-digit',
     year: 'numeric',

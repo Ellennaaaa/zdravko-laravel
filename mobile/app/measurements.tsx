@@ -32,12 +32,12 @@ export default function Measurements() {
       const response = await getMeasurements()
       setMeasurements(response.data.measurements)
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to load measurements.')
+      setError(err.response?.data?.message || 'Neuspješno učitavanje mjerenja.')
     }
   }
 
   const resetForm = () => {
-    setFormData({ value: '', blood_glucose_unit_id: 1, measured_on: '' })
+    setFormData({ value: '', blood_glucose_unit_id: 1, measured_on: today })
     setEditingId(null)
   }
 
@@ -47,10 +47,10 @@ export default function Measurements() {
     try {
       if (editingId) {
         await updateMeasurement(editingId, formData)
-        setSuccess('Measurement updated successfully.')
+        setSuccess('Mjerenje ažurirano uspješno.')
       } else {
         await storeMeasurement(formData)
-        setSuccess('Measurement added successfully.')
+        setSuccess('Mjerenje dodato uspješno.')
       }
       resetForm()
       fetchMeasurements()
@@ -58,7 +58,7 @@ export default function Measurements() {
       if (err.response?.status === 422) {
         setError(Object.values(err.response.data.errors).flat().join(', '))
       } else {
-        setError(err.response?.data?.error || 'Something went wrong.')
+        setError(err.response?.data?.error || '!')
       }
     }
   }
@@ -68,17 +68,17 @@ export default function Measurements() {
     setFormData({
       value: String(measurement.value),
       blood_glucose_unit_id: measurement.blood_glucose_unit_id,
-      measured_on: measurement.measured_on || '',
+      measured_on: measurement.measured_on?.split('T')[0] || '',
     })
   }
 
   const handleDelete = async (id) => {
     try {
       await deleteMeasurement(id)
-      setSuccess('Measurement deleted.')
+      setSuccess('Mjerenje izbrisano.')
       fetchMeasurements()
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to delete.')
+      setError(err.response?.data?.message || 'Neuspješno brisanje mjerenja.')
     }
   }
 
@@ -93,6 +93,7 @@ export default function Measurements() {
         <TextInput
           style={styles.input}
           placeholder="Vrijednost"
+          placeholderTextColor="#999"
           value={formData.value}
           onChangeText={(text) => setFormData({ ...formData, value: text })}
           keyboardType="numeric"
@@ -102,6 +103,8 @@ export default function Measurements() {
           <Picker
             selectedValue={formData.blood_glucose_unit_id}
             onValueChange={(value) => setFormData({ ...formData, blood_glucose_unit_id: value })}
+            style={{ color: '#000' }}
+            dropdownIconColor="#000"
           >
             <Picker.Item label="mg/dL" value={1} />
             <Picker.Item label="mmol/L" value={2} />
@@ -111,6 +114,7 @@ export default function Measurements() {
         <TextInput
           style={styles.input}
           placeholder="Datum (YYYY-MM-DD)"
+          placeholderTextColor="#999"
           value={formData.measured_on}
           onChangeText={(text) => setFormData({ ...formData, measured_on: text })}
         />

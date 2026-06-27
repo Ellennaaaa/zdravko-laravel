@@ -35,9 +35,9 @@ export default function Login() {
     const errors = err.response.data.errors
     setError(Object.values(errors).flat().join(', '))
   } else if (axios.isAxiosError(err)) {
-    setError(err.response?.data?.message || 'Something went wrong')
+    setError(err.response?.data?.message || '!')
   } else {
-    setError('Something went wrong')
+    setError('!')
   }
 }
 }
@@ -53,6 +53,7 @@ export default function Login() {
         <TextInput
           style={styles.input}
           placeholder="Email"
+          placeholderTextColor="#999"
           value={formData.email}
           onChangeText={(text) => setFormData({ ...formData, email: text })}
           keyboardType="email-address"
@@ -62,6 +63,7 @@ export default function Login() {
         <TextInput
           style={styles.input}
           placeholder="Lozinka"
+          placeholderTextColor="#999"
           value={formData.password}
           onChangeText={(text) => setFormData({ ...formData, password: text })}
           secureTextEntry
@@ -111,6 +113,7 @@ const styles = StyleSheet.create({
     borderColor: '#b2ebf2',
     fontSize: 14,
     marginBottom: 10,
+    color: '#000',
   },
   button: {
     backgroundColor: '#3f51b5',
