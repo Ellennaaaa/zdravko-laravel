@@ -59,19 +59,30 @@ class SendHealthReminders extends Command
                 : HealthConstants::MEASUREMENT_REMINDER_HOURS + 1;
 
             if ($hoursPassed >= HealthConstants::MEASUREMENT_REMINDER_HOURS) {
-                 if (! $this->hasUnreadMeasurementReminder($patient->user)) {
+                if (! $this->hasUnreadMeasurementReminder($patient->user)) {
                     $patient->user->notify(new MeasurementReminderNotification());
+
+                    app(\App\Services\PushNotificationService::class)->sendToUser(
+                        $patient->user,
+                        'Blood glucose reminder',
+                        'You have not measured your blood glucose recently.',
+                        [
+                            'type' => 'measurement_reminder',
+                        ]
+                    );
+                }
+
+                $this->info(
+                    'Patient ' . $patient->id .
+                    ' user ' . $patient->user->id .
+                    ' last measurement created at ' . $lastMeasurement->created_at .
+                    ' hours passed: ' . $hoursPassed
+                );
             }
 
-            $this->info(
-                'Patient ' . $patient->id .
-                ' user ' . $patient->user->id .
-                ' last measurement created at ' . $lastMeasurement->created_at .
-                ' hours passed: ' . $hoursPassed
-            );
+            
         }
-    }
-    }
+        }
 
     private function hasUnreadMeasurementReminder($user): bool
     {
@@ -105,7 +116,18 @@ class SendHealthReminders extends Command
             if (! $lastLog) {
                 if (! $this->hasUnreadTherapyReminder($user, $therapy->id)) {
                     $user->notify(new TherapyReminderNotification($therapy));
+
+                    app(\App\Services\PushNotificationService::class)->sendToUser(
+                        $user,
+                        'Therapy reminder',
+                        'It is time to take your therapy.',
+                        [
+                            'type' => 'therapy_reminder',
+                            'therapy_id' => $therapy->id,
+                        ]
+                    );
                 }
+
                 continue;
             }
 
